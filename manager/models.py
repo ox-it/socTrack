@@ -18,7 +18,7 @@ class Device(models.Model):
         blank=True)
     
     def __unicode__ (self):
-        return "local device ID: " + self.local_id
+        return self.local_id
 
 class Sim(models.Model):
     sim_id = models.CharField(
@@ -32,7 +32,7 @@ class Sim(models.Model):
     contract = models.BooleanField(help_text = "Describes whether SIM is on PAYG (true), Contract (false)")
     
     def __unicode__ (self):
-        return self.received_date_time + ":" + self.message[:11]
+        return self.phone_number
         
 class Deployment(models.Model):
     device = models.ForeignKey(Device)
@@ -46,7 +46,7 @@ class Deployment(models.Model):
     survey_end = models.DateField(help_text = "Date survey was/is due to finish")
     
     def __unicode__ (self):
-        return self.device + " survey start:" + self.survey_start + " end:" + self.survey_end
+        return str(self.device) + " From: " + str(self.survey_start) + " To: " + str(self.survey_end)
 
 
 

@@ -7,7 +7,7 @@ class Log(models.Model):
     message = models.TextField()
     
     def __unicode__ (self):
-        return self.received_date_time + ":" + self.message[:11]
+        return self.message[:11]
     
 class Location(models.Model):
     # TODO Check if model field selections are sane - e.g. accuracy is never negative
@@ -24,13 +24,16 @@ class Location(models.Model):
     objects = models.GeoManager()
     
     def __unicode__ (self):
-        return self.date
+        return str(self.sent_date_time)
     
 class BatteryCharge(models.Model):
     message = models.ForeignKey(Log)
     device = models.ForeignKey(Device)
     battery_percentage = models.PositiveSmallIntegerField(help_text="0-100 battery value")
     sent_date_time = models.DateTimeField(help_text="Time and date that the message was sent from the device")
+    
+    def __unicode__ (self):
+        return str(self.device) + " " + str(self.battery_percentage) + "% at: " + str(self.sent_date_time)
 
 class DeviceEvent(models.Model):
     message = models.ForeignKey(Log)
@@ -41,3 +44,5 @@ class DeviceEvent(models.Model):
     
     event = models.CharField(help_text = "A device event e.g. power on/off", max_length="50", choices=DEVICE_EVENTS)
     
+    def __unicode__ (self):
+        return str(self.device) + " " + self.event + " at: " + str(self.sent_date_time)
