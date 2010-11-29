@@ -4,7 +4,6 @@ from manager.models import Device
 class Log(models.Model):
     device = models.ForeignKey(Device)
     received_date_time = models.DateTimeField(help_text="Time and date that the message was received by us")
-    sent_date_time = models.DateTimeField(help_text="Time and date that the message was sent from the device")
     message = models.TextField()
     
     def __unicode__ (self):
@@ -16,9 +15,11 @@ class Location(models.Model):
     device = models.ForeignKey(Device)
     speed = models.DecimalField(max_digits=8, decimal_places=1, help_text = "Speed in km/h")
     heading = models.PositiveSmallIntegerField(help_text = "Heading in degrees, 0-359")
-    altitude = models.IntegerField(help_text = "Altitude in metres")
+    altitude = models.FloatField(help_text = "Altitude in metres")
     accuracy = models.PositiveSmallIntegerField(help_text = "Unknown units")
     location = models.PointField()
+    sent_date_time = models.DateTimeField(help_text="Time and date that the message was sent from the device")
+    sos = models.BooleanField(help_text = "Whether this location data was sent as a result of the 'SOS' button being pressed")
     
     def __unicode__ (self):
         return self.date
@@ -27,12 +28,14 @@ class BatteryCharge(models.Model):
     message = models.ForeignKey(Log)
     device = models.ForeignKey(Device)
     battery_percentage = models.PositiveSmallIntegerField(help_text="0-100 battery value")
+    sent_date_time = models.DateTimeField(help_text="Time and date that the message was sent from the device")
 
 class DeviceEvent(models.Model):
     message = models.ForeignKey(Log)
     device = models.ForeignKey(Device)
+    sent_date_time = models.DateTimeField(help_text="Time and date that the message was sent from the device")
     
-    DEVICE_EVENTS = ()
+    DEVICE_EVENTS = (("Power On Alarm", "Power On Alarm"), ("Power Off Alarm", "Power Off Alarm"), ("Power Low Alarm", "Power Low Alarm"))
     
     event = models.CharField(help_text = "A device event e.g. power on/off", max_length="50", choices=DEVICE_EVENTS)
     

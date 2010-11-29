@@ -13,7 +13,6 @@ class Migration(SchemaMigration):
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('device', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['manager.Device'])),
             ('received_date_time', self.gf('django.db.models.fields.DateTimeField')()),
-            ('sent_date_time', self.gf('django.db.models.fields.DateTimeField')()),
             ('message', self.gf('django.db.models.fields.TextField')()),
         ))
         db.send_create_signal('logger', ['Log'])
@@ -25,9 +24,11 @@ class Migration(SchemaMigration):
             ('device', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['manager.Device'])),
             ('speed', self.gf('django.db.models.fields.DecimalField')(max_digits=8, decimal_places=1)),
             ('heading', self.gf('django.db.models.fields.PositiveSmallIntegerField')()),
-            ('altitude', self.gf('django.db.models.fields.IntegerField')()),
+            ('altitude', self.gf('django.db.models.fields.FloatField')()),
             ('accuracy', self.gf('django.db.models.fields.PositiveSmallIntegerField')()),
             ('location', self.gf('django.contrib.gis.db.models.fields.PointField')()),
+            ('sent_date_time', self.gf('django.db.models.fields.DateTimeField')()),
+            ('sos', self.gf('django.db.models.fields.BooleanField')(default=False)),
         ))
         db.send_create_signal('logger', ['Location'])
 
@@ -37,6 +38,7 @@ class Migration(SchemaMigration):
             ('message', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['logger.Log'])),
             ('device', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['manager.Device'])),
             ('battery_percentage', self.gf('django.db.models.fields.PositiveSmallIntegerField')()),
+            ('sent_date_time', self.gf('django.db.models.fields.DateTimeField')()),
         ))
         db.send_create_signal('logger', ['BatteryCharge'])
 
@@ -45,6 +47,7 @@ class Migration(SchemaMigration):
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('message', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['logger.Log'])),
             ('device', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['manager.Device'])),
+            ('sent_date_time', self.gf('django.db.models.fields.DateTimeField')()),
             ('event', self.gf('django.db.models.fields.CharField')(max_length='50')),
         ))
         db.send_create_signal('logger', ['DeviceEvent'])
@@ -71,24 +74,28 @@ class Migration(SchemaMigration):
             'battery_percentage': ('django.db.models.fields.PositiveSmallIntegerField', [], {}),
             'device': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['manager.Device']"}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'message': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['logger.Log']"})
+            'message': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['logger.Log']"}),
+            'sent_date_time': ('django.db.models.fields.DateTimeField', [], {})
         },
         'logger.deviceevent': {
             'Meta': {'object_name': 'DeviceEvent'},
             'device': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['manager.Device']"}),
             'event': ('django.db.models.fields.CharField', [], {'max_length': "'50'"}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'message': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['logger.Log']"})
+            'message': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['logger.Log']"}),
+            'sent_date_time': ('django.db.models.fields.DateTimeField', [], {})
         },
         'logger.location': {
             'Meta': {'object_name': 'Location'},
             'accuracy': ('django.db.models.fields.PositiveSmallIntegerField', [], {}),
-            'altitude': ('django.db.models.fields.IntegerField', [], {}),
+            'altitude': ('django.db.models.fields.FloatField', [], {}),
             'device': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['manager.Device']"}),
             'heading': ('django.db.models.fields.PositiveSmallIntegerField', [], {}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'location': ('django.contrib.gis.db.models.fields.PointField', [], {}),
             'message': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['logger.Log']"}),
+            'sent_date_time': ('django.db.models.fields.DateTimeField', [], {}),
+            'sos': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'speed': ('django.db.models.fields.DecimalField', [], {'max_digits': '8', 'decimal_places': '1'})
         },
         'logger.log': {
@@ -96,8 +103,7 @@ class Migration(SchemaMigration):
             'device': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['manager.Device']"}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'message': ('django.db.models.fields.TextField', [], {}),
-            'received_date_time': ('django.db.models.fields.DateTimeField', [], {}),
-            'sent_date_time': ('django.db.models.fields.DateTimeField', [], {})
+            'received_date_time': ('django.db.models.fields.DateTimeField', [], {})
         },
         'manager.device': {
             'Meta': {'object_name': 'Device'},
