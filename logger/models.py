@@ -20,6 +20,8 @@ class Location(models.Model):
     location = models.PointField()
     sent_date_time = models.DateTimeField(help_text="Time and date that the message was sent from the device")
     sos = models.BooleanField(help_text = "Whether this location data was sent as a result of the 'SOS' button being pressed")
+    analysed = models.BooleanField(help_text = "Whether this location data has been analysed", default=False)
+    objects = models.GeoManager()
     
     def __unicode__ (self):
         return self.date

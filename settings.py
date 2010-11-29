@@ -95,4 +95,5 @@ INSTALLED_APPS = (
     'south',
     'manager',
     'logger',
+    'analyser',
 )

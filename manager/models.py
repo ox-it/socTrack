@@ -8,7 +8,7 @@ class Network(models.Model):
     
 class Device(models.Model):
     # IMEIs are variable length - max length should be 19 though
-    imei = models.CharField(max_length=19)
+    imei = models.CharField(max_length=19, unique=True)
     local_id = models.CharField( 
         max_length=10,
         help_text = "An arbitrary local identifier (e.g. for labeling) up to ten characters long")

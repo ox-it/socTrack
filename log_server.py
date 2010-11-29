@@ -17,7 +17,7 @@ class GL100(LineReceiver):
     Implements the protocol that GL-100 devices send
     """
     
-    delimiter = '\0'
+    delimiter = '\0\n'
     
     @staticmethod
     def dtstring_to_datetime(dtsring):
