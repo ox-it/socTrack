@@ -1,10 +1,10 @@
 from django.contrib.gis.db import models
-from socTrack.manager.models import Device
+from manager.models import Device
 
 class Log(models.Model):
     device = models.ForeignKey(Device)
     received_date_time = models.DateTimeField(help_text="Time and date that the message was received by us")
-    sent_date_time = models.DateTimeField(help_text="Time and date taht the message was sent from the device")
+    sent_date_time = models.DateTimeField(help_text="Time and date that the message was sent from the device")
     message = models.TextField()
     
     def __unicode__ (self):
@@ -14,9 +14,9 @@ class Location(models.Model):
     # TODO Check if model field selections are sane - e.g. accuracy is never negative
     message = models.ForeignKey(Log)
     device = models.ForeignKey(Device)
-    speed = models.DecimalField(max_digits=8, decimal_places=1, help_text = "Unknown units")
+    speed = models.DecimalField(max_digits=8, decimal_places=1, help_text = "Speed in km/h")
     heading = models.PositiveSmallIntegerField(help_text = "Heading in degrees, 0-359")
-    altitude = models.IntegerField(help_text = "Unknown units")
+    altitude = models.IntegerField(help_text = "Altitude in metres")
     accuracy = models.PositiveSmallIntegerField(help_text = "Unknown units")
     location = models.PointField()
     

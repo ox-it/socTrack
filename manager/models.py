@@ -10,18 +10,19 @@ class Device(models.Model):
     # IMEIs are variable length - max length should be 19 though
     imei = models.CharField(max_length=19)
     local_id = models.CharField( 
-        max_length=10
+        max_length=10,
         help_text = "An arbitrary local identifier (e.g. for labeling) up to ten characters long")
     received_date = models.DateField(
-        help_text = "Date the device was received and ready for service (for purchase tracking)"
-        null=True, blank=True)
+        help_text = "Date the device was received and ready for service (for purchase tracking)",
+        null=True,
+        blank=True)
     
     def __unicode__ (self):
         return "local device ID: " + self.local_id
 
 class Sim(models.Model):
     sim_id = models.CharField(
-        max_length = 50
+        max_length = 50,
         help_text = "The SIM ID as usually printed on the back of the SIM card")
     # phone_number could build in some validation - max_length = 20 is not confirmed as always true internationally, but should be in the UK
     phone_number = models.CharField(max_length=20)
@@ -42,7 +43,7 @@ class Deployment(models.Model):
     received_back_date = models.DateField(help_text = "Date device was received back from recipient", null=True, blank=True)
     
     survey_start = models.DateField(help_text = "Date survey was/is due to start")
-    survey_end = mdoels.DateField(help_text = "Date survey was/is due to finish")
+    survey_end = models.DateField(help_text = "Date survey was/is due to finish")
     
     def __unicode__ (self):
         return self.device + " survey start:" + self.survey_start + " end:" + self.survey_end
