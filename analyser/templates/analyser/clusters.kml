@@ -29,6 +29,7 @@
       {% for location in locations %}
         <Placemark>
           <name>{{ location.sent_date_time }}</name>
+          <description>Speed: {{ location.speed }} km/h, heading: {{ location.heading }}, altitude: {{ location.altitude }}</description>
           <TimeSpan>
             <begin>{{ location.sent_date_time|date:"Y-m-d" }}T{{ location.sent_date_time|date:"H:i:s" }}Z</begin>
             <end>{{ location.next|date:"Y-m-d" }}T{{ location.next|date:"H:i:s" }}Z</end>
