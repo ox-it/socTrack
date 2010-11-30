@@ -13,6 +13,7 @@ from datetime import datetime, timedelta
 THRESHOLD_DISTANCE = 30 # The radius points are allowed to be from each other to
                         # be considered as part of a cluster
 THRESHOLD_TIME = 5 # How many minutes in the same place for this to be a cluster
+THRESHOLD_ACCURACY = 6 # Only consider GPS points below this level of accuracy
 GOOGLE_KEY = 'ABQIAAAAlUxesxSydOb_SQF6o594BBSpsA0gLz9oElZerpIFXY4w7Ru4MRQhVheUH73nj1uBq3KJqJnU6tGCYw'
 
 class Command(BaseCommand):
@@ -25,7 +26,7 @@ class Command(BaseCommand):
         for device in Device.objects.all():
             current_cluster_locations = set()
             last_chance = False
-            for location in Location.objects.filter(device=device, analysed=False, sent_date_time__lt=datetime.now() - timedelta(hours=-1)).order_by('sent_date_time'):
+            for location in Location.objects.filter(device=device, analysed=False, sent_date_time__lt=datetime.now() - timedelta(hours=-1), accuracy__lt=THRESHOLD_ACCURACY).order_by('sent_date_time'):
                 
                 location.analysed = True
                 
@@ -42,6 +43,7 @@ class Command(BaseCommand):
                     if location in Location.objects.filter(location__distance_lt=(current_cluster.centroid, Distance(m=THRESHOLD_DISTANCE))):
                         # Good, our cluster just got bigger
                         current_cluster_locations.add(location)
+                        last_chance = False
                     else:
                         # If this is the first outlier, then just move on to the next one
                         if not last_chance:

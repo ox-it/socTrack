@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+  <Document>
+    <name>GPS information for {{ device.local_id }} (IMEI: {{ device.imei }})</name>
+    <Folder>
+      <name>Identified Clusters</name>
+      {% for cluster in clusters %}
+        <Placemark>
+          <name>{{ cluster.youngest }} to {{ cluster.eldest }}</name>
+          <description>{{ cluster.geocoded }}</description>
+          <TimeSpan>
+            <begin>{{ cluster.youngest|date:"Y-m-d" }}T{{ cluster.youngest|date:"H:i:s" }}Z</begin>
+            <end>{{ cluster.eldest|date:"Y-m-d" }}T{{ cluster.eldest|date:"H:i:s" }}Z</end>
+          </TimeSpan>
+          {{ cluster.kml|safe }}
+        </Placemark>
+      {% endfor %}
+    </Folder>
+    <Folder>
+      <name>Lines</name>
+      {% for line in lines %}
+        <Placemark>
+          {{ line.kml|safe }}
+        </Placemark>
+      {% endfor %}
+    </Folder>
+    <Folder>
+      <name>Points</name>
+      {% for location in locations %}
+        <Placemark>
+          <name>{{ location.sent_date_time }}</name>
+          <TimeSpan>
+            <begin>{{ location.sent_date_time|date:"Y-m-d" }}T{{ location.sent_date_time|date:"H:i:s" }}Z</begin>
+            <end>{{ location.next|date:"Y-m-d" }}T{{ location.next|date:"H:i:s" }}Z</end>
+          </TimeSpan>
+          {{ location.location.kml|safe }}
+        </Placemark>
+      {% endfor %}
+    </Folder>
+  </Document>
+</kml>
