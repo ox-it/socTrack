@@ -4,6 +4,7 @@ from django.contrib.gis.measure import Distance
 
 from geopy import geocoders
 
+from secrets import secrets
 from analyser.models import Cluster
 from analyser.haversine import haversine
 from logger.models import Location
@@ -15,7 +16,6 @@ THRESHOLD_DISTANCE = 0.1 # The radius points are allowed to be from each other t
                         # be considered as part of a cluster
 THRESHOLD_TIME = 5 # How many minutes in the same place for this to be a cluster
 THRESHOLD_ACCURACY = 6 # Only consider GPS points below this level of accuracy
-GOOGLE_KEY = 'ABQIAAAAlUxesxSydOb_SQF6o594BBSpsA0gLz9oElZerpIFXY4w7Ru4MRQhVheUH73nj1uBq3KJqJnU6tGCYw'
 
 class Command(BaseCommand):
     args = ''
@@ -57,7 +57,7 @@ class Command(BaseCommand):
                             end = max([l.sent_date_time for l in current_cluster_locations])
                             if end - start > timedelta(minutes=THRESHOLD_TIME):
                                 # We've got a cluster - geocode it
-                                geocoder = geocoders.Google(GOOGLE_KEY)
+                                geocoder = geocoders.Google(secrets['GOOGLE'])
                                 (new_place, new_point) = geocoder.reverse((current_cluster.centroid[1], current_cluster.centroid[0]))
                                 
                                 c = Cluster(geocoded=new_place, device=device)

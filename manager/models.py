@@ -1,8 +1,24 @@
+from datetime import datetime
+import httplib
+import urllib
+
 from django.db import models
+
+from secrets import secrets
 
 class Network(models.Model):
     name = models.CharField(max_length=30)
-
+    apn = models.CharField(max_length=20,
+                           default='',
+                           help_text="The access point name for this network")
+    apn_username = models.CharField(max_length=20,
+                           default='',
+                           blank=True,
+                           help_text="The password for ")
+    apn_password = models.CharField(max_length=20,
+                           default='',
+                           blank=True,
+                           help_text="The access point name for this network")
     def __unicode__ (self):
         return self.name
     
@@ -36,7 +52,29 @@ class Sim(models.Model):
         help_text = "An arbitrary local identifier (e.g. for labeling) up to ten characters long")
     def __unicode__ (self):
         return self.phone_number
-        
+
+class SMS(models.Model):
+    sim = models.ForeignKey(Sim)
+    message = models.CharField(max_length=160)
+    response = models.CharField(max_length=160, null=True)
+    send_time = models.DateTimeField()
+    
+    def save(self, *args, **kwargs):
+        if self.response is not None:
+            return
+        conn = httplib.HTTPConnection('www.meercom1.co.uk', 80)
+        conn.request("POST",
+                     "/sendsms.asp",
+                     urllib.urlencode({
+                        'account': secrets['SMS_ACCOUNT'],
+                        'password': secrets['SMS_PASSWORD'],
+                        'message': self.message,
+                        'phone': self.sim.phone_number,
+                     }),
+                     {"Content-type": "application/x-www-form-urlencoded", "Accept": "text/plain"})
+        self.response = conn.getresponse().read()
+        super(SMS, self).save(*args, **kwargs)
+
 class Deployment(models.Model):
     device = models.ForeignKey(Device)
     sim = models.ForeignKey(Sim)
@@ -50,7 +88,33 @@ class Deployment(models.Model):
     
     def __unicode__ (self):
         return str(self.device) + " From: " + str(self.survey_start) + " To: " + str(self.survey_end)
-
-
-
-
+    
+    def configure_device(self, ip, port, sms):
+        """
+        Sends a message to the device in which it configures itself to use
+        this server for location reporting
+        """
+        send_time = datetime.now()
+        SMS(sim=self.sim,
+            message=','.join([
+                'AT+GTSRI=gl100',
+                '1', # Force GPRS reporting (0 = GPRS with SMS fallback, 2 = SMS only)
+                '0', # Close GPRS session after data sending, 1 = persistent
+                self.sim.network.apn,
+                self.sim.network.apn_username,
+                self.sim.network.apn_password,
+                ip,
+                port,
+                sms,
+                send_time.strftime('%Y%m%d%H%M%S')
+            ]),
+            send_time=send_time).save()
+    
+    def send_device_message(self, message):
+        """
+        Sends a message to the device
+        """
+        send_time = datetime.now()
+        SMS(sim=self.sim,
+            message=message,
+            send_time=send_time).save()

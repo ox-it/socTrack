@@ -1,5 +1,5 @@
 from django.contrib import admin
-from manager.models import Network, Device, Sim, Deployment
+from manager.models import Network, Device, Sim, Deployment, SMS
 
 """
 Iterates through models in an app and adds them to Admin UI
@@ -23,37 +23,11 @@ class DeploymentAdmin(admin.ModelAdmin):
     date_hierarchy = 'survey_start'
     list_display = ('device', 'sim', 'survey_start', 'survey_end')
     pass
-    
+
+class SMSAdmin(admin.ModelAdmin):
+    pass
+
 admin.site.register(Network, NetworkAdmin)
 admin.site.register(Device, DeviceAdmin)
 admin.site.register(Sim, SimAdmin)
-admin.site.register(Deployment, DeploymentAdmin)
-
-"""
-
-    
-
-
-    class BatteryChargeAdmin(admin.ModelAdmin):
-        date_hierarchy = 'sent_date_time'
-        list_display = ('device', 'sent_date_time', 'battery_percentage') 
-        list_filter = ('device', )
-        ordering = ['-sent_date_time']
-        pass
-
-    class DeviceEventAdmin(admin.ModelAdmin):
-        date_hierarchy = 'sent_date_time'
-        list_display = ('device', 'sent_date_time', 'event') 
-        list_filter = ('device', 'event')
-        ordering = ['-sent_date_time']
-        pass
-
-    class LocationAdmin(admin.ModelAdmin):
-        date_hierarchy = 'sent_date_time'
-        list_display = ('device', 'sent_date_time', 'location', 'speed', 'heading', 'altitude') 
-        list_filter = ('device',)
-        ordering = ['-sent_date_time']
-        pass
-
-    
-"""
+admin.site.register(SMS, SMSAdmin)
