@@ -16,7 +16,7 @@ class DeviceAdmin(admin.ModelAdmin):
 
 class SimAdmin(admin.ModelAdmin):
     date_hierarchy = 'data_plan_expiry'
-    list_display = ('network', 'phone_number', 'sim_id', 'contract')
+    list_display = ('local_id', 'network', 'phone_number', 'sim_id', 'contract')
     ordering = ['-sim_id']
     
 class DeploymentAdmin(admin.ModelAdmin):
