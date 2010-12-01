@@ -104,7 +104,7 @@ class Deployment(models.Model):
         SMS(sim=self.sim,
             device=self.device,
             message=','.join([
-                'AT+GTSRI=gl100',
+                'AT+GTSRI=%s' % self.device.password,
                 '1', # Force GPRS reporting (0 = GPRS with SMS fallback, 2 = SMS only)
                 '0', # Close GPRS session after data sending, 1 = persistent
                 self.sim.network.apn,

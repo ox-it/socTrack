@@ -38,7 +38,7 @@ class DeploymentAdmin(admin.ModelAdmin):
     def _configure_report(self, queryset, interval):
         for deployment in queryset:
             deployment.send_device_message(','.join([
-                    'AT+GTTRI=gl100',
+                    'AT+GTTRI=%s' % deployment.device.password,
                     '0000', # Reporting start time
                     '2359', # Reporting end time
                     '1' if interval < 60 else int(interval/60), # Send interval, in minutes
@@ -62,7 +62,7 @@ class DeploymentAdmin(admin.ModelAdmin):
     def stop_reporting(self, request, queryset):
         for deployment in queryset:
             deployment.send_device_message(','.join([
-                    'AT+GTTRI=gl100',
+                    'AT+GTTRI=%s' % deployment.device.password,
                     '0000', # Reporting start time
                     '0001', # Reporting end time
                     '1', # Send interval, in minutes
@@ -75,7 +75,7 @@ class DeploymentAdmin(admin.ModelAdmin):
     def _send_rto(self, queryset, command, human_message):
         for deployment in queryset:
             deployment.send_device_message(','.join([
-                    'AT+GTRTO=gl100',
+                    'AT+GTRTO=%s' % deployment.device.password,
                     command, # Information type
                     datetime.now().strftime('%Y%m%d%H%M%S')
                 ]),
@@ -96,7 +96,7 @@ class DeploymentAdmin(admin.ModelAdmin):
     def _set_mode(self, queryset, a, b):
         for deployment in queryset:
             deployment.send_device_message(','.join([
-                    'AT+GTSFR=gl100',
+                    'AT+GTSFR=%s' % deployment.device.password,
                     '1',
                     '1',
                     '1',
