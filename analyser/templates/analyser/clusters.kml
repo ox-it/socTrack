@@ -5,15 +5,24 @@
     <Folder>
       <name>Identified Clusters</name>
       {% for cluster in clusters %}
-        <Placemark>
+        <Folder>
           <name>{{ cluster.youngest }} to {{ cluster.eldest }}</name>
           <description>{{ cluster.geocoded }}</description>
-          <TimeSpan>
-            <begin>{{ cluster.youngest|date:"Y-m-d" }}T{{ cluster.youngest|date:"H:i:s" }}Z</begin>
-            <end>{{ cluster.eldest|date:"Y-m-d" }}T{{ cluster.eldest|date:"H:i:s" }}Z</end>
-          </TimeSpan>
-          {{ cluster.kml|safe }}
-        </Placemark>
+          <Placemark>
+            <TimeSpan>
+              <begin>{{ cluster.youngest|date:"Y-m-d" }}T{{ cluster.youngest|date:"H:i:s" }}Z</begin>
+              <end>{{ cluster.eldest|date:"Y-m-d" }}T{{ cluster.eldest|date:"H:i:s" }}Z</end>
+            </TimeSpan>
+            {{ cluster.poly_kml|safe }}
+          </Placemark>
+          <Placemark>
+            <TimeSpan>
+              <begin>{{ cluster.youngest|date:"Y-m-d" }}T{{ cluster.youngest|date:"H:i:s" }}Z</begin>
+              <end>{{ cluster.eldest|date:"Y-m-d" }}T{{ cluster.eldest|date:"H:i:s" }}Z</end>
+            </TimeSpan>
+            {{ cluster.centre_kml|safe }}
+          </Placemark>
+        </Folder>
       {% endfor %}
     </Folder>
     <Folder>

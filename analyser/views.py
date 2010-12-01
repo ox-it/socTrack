@@ -26,7 +26,8 @@ def render_kml(request, imei):
             'geocoded': cluster.geocoded,
             'youngest': youngest,
             'eldest': eldest,
-            'kml': MultiPoint([l.location for l in cluster.locations.all()]).convex_hull.kml,
+            'poly_kml': MultiPoint([l.location for l in cluster.locations.all()]).convex_hull.kml,
+            'centre_kml': MultiPoint([l.location for l in cluster.locations.all()]).centroid.kml,
         })
     
     lines = []
