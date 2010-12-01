@@ -33,6 +33,11 @@ class Device(models.Model):
         help_text = "Date the device was received and ready for service (for purchase tracking)",
         null=True,
         blank=True)
+    password = models.CharField(
+        max_length=8,
+        default='gl100',
+        help_text='The default password for the device'
+    )
     
     def __unicode__ (self):
         return self.local_id
@@ -60,6 +65,7 @@ class SMS(models.Model):
     message = models.CharField(max_length=160)
     response = models.CharField(max_length=160, null=True)
     send_time = models.DateTimeField()
+    human_message = models.TextField(max_length=160, blank=True)
     
     def save(self, *args, **kwargs):
         conn = httplib.HTTPConnection('www.meercom1.co.uk', 80)
@@ -98,7 +104,7 @@ class Deployment(models.Model):
         SMS(sim=self.sim,
             device=self.device,
             message=','.join([
-                'AT+GTSRI=gl100',
+                'AT+GTSRI=%s' % self.device.password,
                 '1', # Force GPRS reporting (0 = GPRS with SMS fallback, 2 = SMS only)
                 '0', # Close GPRS session after data sending, 1 = persistent
                 self.sim.network.apn,
@@ -109,9 +115,10 @@ class Deployment(models.Model):
                 settings.FALLBACK_SMS,
                 send_time.strftime('%Y%m%d%H%M%S')
             ]),
-            send_time=send_time).save()
+            send_time=send_time,
+            human_message="Configuring device to use server: " + settings.LOG_SERVER_IP + ':' + settings.LOG_SERVER_PORT).save()
     
-    def send_device_message(self, message):
+    def send_device_message(self, message, human_message):
         """
         Sends a message to the device
         """
@@ -119,4 +126,5 @@ class Deployment(models.Model):
         SMS(sim=self.sim,
             device=self.device,
             message=message,
-            send_time=send_time).save()
+            send_time=send_time,
+            human_message=human_message).save()

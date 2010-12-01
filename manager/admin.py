@@ -37,14 +37,15 @@ class DeploymentAdmin(admin.ModelAdmin):
     
     def _configure_report(self, queryset, interval):
         for deployment in queryset:
-            deployment.send_device_message(','.join(
-                'AT+GTTRI=gl100',
-                '0000', # Reporting start time
-                '2359', # Reporting end time
-                '1' if interval < 60 else int(interval/60), # Send interval, in minutes
-                interval, # Fix interval, in seconds
-                datetime.now().strftime('%Y%m%d%H%M%S')
-            ))
+            deployment.send_device_message(','.join([
+                    'AT+GTTRI=%s' % deployment.device.password,
+                    '0000', # Reporting start time
+                    '2359', # Reporting end time
+                    '1' if interval < 60 else str(int(interval/60)), # Send interval, in minutes
+                    str(interval), # Fix interval, in seconds
+                    datetime.now().strftime('%Y%m%d%H%M%S')
+                ]),
+                'Configuring reporting at %d second intervals' % interval)
     
     def configure_report_every_5s(self, request, queryset):
         self._configure_report(queryset, 5)
@@ -60,58 +61,61 @@ class DeploymentAdmin(admin.ModelAdmin):
     
     def stop_reporting(self, request, queryset):
         for deployment in queryset:
-            deployment.send_device_message(','.join(
-                'AT+GTTRI=gl100',
-                '0000', # Reporting start time
-                '0001', # Reporting end time
-                '1', # Send interval, in minutes
-                '120', # Fix interval, in seconds
-                datetime.now().strftime('%Y%m%d%H%M%S')
-            ))
+            deployment.send_device_message(','.join([
+                    'AT+GTTRI=%s' % deployment.device.password,
+                    '0000', # Reporting start time
+                    '0001', # Reporting end time
+                    '1', # Send interval, in minutes
+                    '120', # Fix interval, in seconds
+                    datetime.now().strftime('%Y%m%d%H%M%S')
+                ]),
+                'Stop reporting')
     stop_reporting.short_description = "Tell the device to stop reporting"
     
-    def _send_rto(self, queryset, command):
+    def _send_rto(self, queryset, command, human_message):
         for deployment in queryset:
-            deployment.send_device_message(','.join(
-                'AT+GTRTO=gl100',
-                command, # Information type
-                datetime.now().strftime('%Y%m%d%H%M%S')
-            ))
+            deployment.send_device_message(','.join([
+                    'AT+GTRTO=%s' % deployment.device.password,
+                    command, # Information type
+                    datetime.now().strftime('%Y%m%d%H%M%S')
+                ]),
+                human_message)
     
     def check_battery(self, request, queryset):
-        self._send_rto('A')
+        self._send_rto(queryset, 'A', 'Send battery level information now')
     check_battery.short_description = "Ask the device to send battery level information now"
     
     def reboot_device(self, request, queryset):
-        self._send_rto('3')
+        self._send_rto(queryset, '3', 'Reboot the device')
     reboot_device.short_description = "Reboot the device"
     
     def locate_now(self, request, queryset):
-        self._send_rto('1')
+        self._send_rto(queryset, '1', 'Send location now')
     locate_now.short_description = "Ask to device to send a location update immediately"
     
     def _set_mode(self, queryset, a, b):
         for deployment in queryset:
-            deployment.send_device_message(','.join(
-                'AT+GTSFR=gl100',
-                '1',
-                '1',
-                '1',
-                '1',
-                '1',
-                a,
-                b,
-                '0',
-                '0',
-                datetime.now().strftime('%Y%m%d%H%M%S')
-            ))
+            deployment.send_device_message(','.join([
+                    'AT+GTSFR=%s' % deployment.device.password,
+                    '1',
+                    '1',
+                    '1',
+                    '1',
+                    '1',
+                    a,
+                    b,
+                    '0',
+                    '0',
+                    datetime.now().strftime('%Y%m%d%H%M%S')
+                ]),
+                'Changing device to %s mode' % 'walking' if a == 2 else 'vehicle')
     
     def configure_walking_mode(self, request, queryset):
-        self._set_mode('2', '100')
+        self._set_mode(queryset, '2', '100')
     configure_walking_mode.short_description = "Configure the device for walking mode"
     
     def configure_vehicle_mode(self, request, queryset):
-        self._set_mode('15', '200')
+        self._set_mode(queryset, '15', '200')
     configure_vehicle_mode.short_description = "Configure the device for vehicle mode"
 
 
