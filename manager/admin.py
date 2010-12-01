@@ -121,4 +121,5 @@ class SMSAdmin(admin.ModelAdmin):
 admin.site.register(Network, NetworkAdmin)
 admin.site.register(Device, DeviceAdmin)
 admin.site.register(Sim, SimAdmin)
+admin.site.register(Deployment, DeploymentAdmin)
 admin.site.register(SMS, SMSAdmin)
