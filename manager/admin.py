@@ -41,8 +41,8 @@ class DeploymentAdmin(admin.ModelAdmin):
                     'AT+GTTRI=%s' % deployment.device.password,
                     '0000', # Reporting start time
                     '2359', # Reporting end time
-                    '1' if interval < 60 else int(interval/60), # Send interval, in minutes
-                    interval, # Fix interval, in seconds
+                    '1' if interval < 60 else str(int(interval/60)), # Send interval, in minutes
+                    str(interval), # Fix interval, in seconds
                     datetime.now().strftime('%Y%m%d%H%M%S')
                 ]),
                 'Configuring reporting at %d second intervals' % interval)
