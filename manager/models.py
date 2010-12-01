@@ -51,7 +51,7 @@ class Sim(models.Model):
         max_length=10,
         help_text = "An arbitrary local identifier (e.g. for labeling) up to ten characters long")
     def __unicode__ (self):
-        return self.phone_number
+        return self.local_id
 
 class SMS(models.Model):
     sim = models.ForeignKey(Sim)
@@ -60,8 +60,6 @@ class SMS(models.Model):
     send_time = models.DateTimeField()
     
     def save(self, *args, **kwargs):
-        if self.response is not None:
-            return
         conn = httplib.HTTPConnection('www.meercom1.co.uk', 80)
         conn.request("POST",
                      "/sendsms.asp",
