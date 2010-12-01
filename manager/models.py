@@ -30,7 +30,10 @@ class Sim(models.Model):
     data_plan_expiry = models.DateField(help_text = "Date the current data plan expires", null=True, blank=True)
     notes = models.TextField(help_text = "General notes about the SIM card e.g. it is blue", blank=True)
     contract = models.BooleanField(help_text = "Describes whether SIM is on PAYG (true), Contract (false)")
-    
+    local_id = models.CharField( 
+        default="",
+        max_length=10,
+        help_text = "An arbitrary local identifier (e.g. for labeling) up to ten characters long")
     def __unicode__ (self):
         return self.phone_number
         
