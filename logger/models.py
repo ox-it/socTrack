@@ -1,10 +1,11 @@
 from django.contrib.gis.db import models
-from manager.models import Device
+from manager.models import Device, SMS
 
 class Log(models.Model):
     device = models.ForeignKey(Device)
     received_date_time = models.DateTimeField(help_text="Time and date that the message was received by us")
     message = models.TextField()
+    cause = models.ForeignKey(SMS, null=True)
     
     def __unicode__ (self):
         return self.message[:11]

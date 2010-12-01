@@ -3,6 +3,7 @@ import httplib
 import urllib
 
 from django.db import models
+from django.conf import settings
 
 from secrets import secrets
 
@@ -55,6 +56,7 @@ class Sim(models.Model):
 
 class SMS(models.Model):
     sim = models.ForeignKey(Sim)
+    device = models.ForeignKey(Device)
     message = models.CharField(max_length=160)
     response = models.CharField(max_length=160, null=True)
     send_time = models.DateTimeField()
@@ -87,13 +89,14 @@ class Deployment(models.Model):
     def __unicode__ (self):
         return str(self.device) + " From: " + str(self.survey_start) + " To: " + str(self.survey_end)
     
-    def configure_device(self, ip, port, sms):
+    def configure_device(self):
         """
         Sends a message to the device in which it configures itself to use
         this server for location reporting
         """
         send_time = datetime.now()
         SMS(sim=self.sim,
+            device=self.device,
             message=','.join([
                 'AT+GTSRI=gl100',
                 '1', # Force GPRS reporting (0 = GPRS with SMS fallback, 2 = SMS only)
@@ -101,9 +104,9 @@ class Deployment(models.Model):
                 self.sim.network.apn,
                 self.sim.network.apn_username,
                 self.sim.network.apn_password,
-                ip,
-                port,
-                sms,
+                settings.LOG_SERVER_IP,
+                settings.LOG_SERVER_PORT,
+                settings.FALLBACK_SMS,
                 send_time.strftime('%Y%m%d%H%M%S')
             ]),
             send_time=send_time).save()
@@ -114,5 +117,6 @@ class Deployment(models.Model):
         """
         send_time = datetime.now()
         SMS(sim=self.sim,
+            device=self.device,
             message=message,
             send_time=send_time).save()

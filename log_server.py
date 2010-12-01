@@ -7,7 +7,7 @@ from twisted.internet import reactor
 
 from django.contrib.gis.geos import Point
 
-from manager.models import Device
+from manager.models import Device, SMS
 from logger.models import Log, Location, DeviceEvent, BatteryCharge
 
 LOG_PORT = 23456
@@ -126,7 +126,12 @@ class GL100(LineReceiver):
             
         else:
             # Received Acknowledgement Message
-            processed['type'] = 'response'
+            if header_tail in ('GTSZI', 'GTRTO'):
+                data.popleft() # There's information before the send_time
+            processed.update({
+                'type': 'ack',
+                'send_time': GL100.dtstring_to_datetime(data.popleft()),
+            })
         
         return processed
 
@@ -135,7 +140,7 @@ class GL100(LineReceiver):
         data = self.parse_data(line)
         
         # First off, write this line to the log whole
-        log = self.factory.record_log(data['imei'], data['raw'])
+        log = self.factory.record_log(**data)
         
         # Now update our models as appropriate
         if data['type'] == 'location':
@@ -156,9 +161,17 @@ class DjangoLoggingFactory(ServerFactory):
     def __init__(self, protocol):
         self.protocol = protocol
     
-    def record_log(self, imei, line):
+    def record_log(self, imei, raw, type, send_time=None, **kwargs):
         device, created = Device.objects.get_or_create(imei=imei)
-        l = Log(device=device, received_date_time=datetime.now(), message=line)
+        if type == 'ack':
+            # Acknowledgement, so try and find the SMS which this refers to
+            try:
+                sms = SMS.objects.get(device=device, send_time=send_time)
+                l = Log(device=device, received_date_time=datetime.now(), message=raw, cause=sms)
+            except SMS.DoesNotExist:
+                l = Log(device=device, received_date_time=datetime.now(), message=raw)
+        else:
+            l = Log(device=device, received_date_time=datetime.now(), message=raw)
         l.save()
         return l
     
@@ -172,6 +185,10 @@ class DjangoLoggingFactory(ServerFactory):
         BatteryCharge(device=device, sent_date_time=send_dt, message=log, battery_percentage=percentage).save()
     
     def record_event(self, log, imei, event, send_dt, **kwargs):
+        device, created = Device.objects.get_or_create(imei=imei)
+        DeviceEvent(device=device, sent_date_time=send_dt, message=log, event=event).save()
+    
+    def record_ack(self, log, imei, send_time, **kwargs):
         device, created = Device.objects.get_or_create(imei=imei)
         DeviceEvent(device=device, sent_date_time=send_dt, message=log, event=event).save()
 
