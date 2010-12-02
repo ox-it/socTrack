@@ -23,6 +23,7 @@ class LocationAdmin(admin.ModelAdmin):
 class LogAdmin(admin.ModelAdmin):
     date_hierarchy = 'received_date_time'
     list_display = ('device', 'received_date_time', '__unicode__')
+    list_filter = ('device',)
 
 admin.site.register(BatteryCharge, BatteryChargeAdmin)
 admin.site.register(DeviceEvent, DeviceEventAdmin)
