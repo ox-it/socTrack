@@ -35,6 +35,7 @@ class Device(models.Model):
         blank=True)
     password = models.CharField(
         max_length=8,
+        blank=True,
         default='gl100',
         help_text='The default password for the device'
     )
