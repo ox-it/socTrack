@@ -71,7 +71,7 @@ class DeviceEvent(models.Model):
     device = models.ForeignKey(Device)
     sent_date_time = models.DateTimeField(help_text="Time and date that the message was sent from the device")
     
-    DEVICE_EVENTS = (("Power On Alarm", "Power On Alarm"), ("Power Off Alarm", "Power Off Alarm"), ("Power Low Alarm", "Power Low Alarm"))
+    DEVICE_EVENTS = (("Power On Alarm", "Power On Alarm"), ("Power Off Alarm", "Power Off Alarm"), ("Power Low Alarm", "Power Low Alarm"), ("Start Charging Report", "Start Charging Report"), ("Finish charging report", "Finish charging report"))
     
     event = models.CharField(help_text = "A device event e.g. power on/off", max_length="50", choices=DEVICE_EVENTS)
     
