@@ -1,5 +1,5 @@
 from django.conf.urls.defaults import *
 
 urlpatterns = patterns('analyser',
-    (r'^(?P<imei>[^.]+)\.kml$', 'views.render_kml'),
+    (r'^(?P<deployment>\d+)\.kml$', 'views.render_kml'),
 )
