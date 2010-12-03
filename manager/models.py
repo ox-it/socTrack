@@ -92,6 +92,8 @@ class Deployment(models.Model):
     
     survey_start = models.DateField(help_text = "Date survey was/is due to start")
     survey_end = models.DateField(help_text = "Date survey was/is due to finish")
+    name = models.CharField(help_text = "Name of person with whom the device is deployed", max_length=255)
+    contact = models.CharField(help_text="Contact details for person", max_length=255)
     
     def __unicode__ (self):
         return str(self.device) + " From: " + str(self.survey_start) + " To: " + str(self.survey_end)

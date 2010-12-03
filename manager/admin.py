@@ -23,7 +23,7 @@ class SimAdmin(admin.ModelAdmin):
     
 class DeploymentAdmin(admin.ModelAdmin):
     date_hierarchy = 'survey_start'
-    list_display = ('device', 'sim', 'survey_start', 'survey_end')
+    list_display = ('device', 'sim', 'survey_start', 'survey_end', 'name', 'contact')
     
     actions = ['configure_device', 'stop_reporting', 'check_battery', 'reboot_device', 'locate_now',
                'configure_report_every_5s', 'configure_report_every_60s', 'configure_report_every_15m',
