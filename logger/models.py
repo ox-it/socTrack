@@ -1,4 +1,7 @@
+from datetime import datetime, time
+
 from django.contrib.gis.db import models
+
 from manager.models import Device, SMS
 
 class Log(models.Model):
@@ -9,6 +12,11 @@ class Log(models.Model):
     
     def __unicode__ (self):
         return self.message[:11]
+    
+    def for_deployment(deployment):
+        start = datetime.combine(deployment.survey_start, time(0, 0, 0))
+        end = datetime.combine(deployment.survey_end, time(23, 59, 59))
+        return Log.objects.filter(device=deployment.device, received_date_time__gt=start, received_date_time__lt=end)
     
 class Location(models.Model):
     # TODO Check if model field selections are sane - e.g. accuracy is never negative
@@ -35,6 +43,13 @@ class Location(models.Model):
     def __unicode__ (self):
         return str(self.sent_date_time)
     
+    @staticmethod
+    def for_deployment(deployment):
+        start = datetime.combine(deployment.survey_start, time(0, 0, 0))
+        end = datetime.combine(deployment.survey_end, time(23, 59, 59))
+        return Location.objects.filter(device=deployment.device, sent_date_time__gt=start, sent_date_time__lt=end)
+
+    
 class BatteryCharge(models.Model):
     message = models.ForeignKey(Log)
     device = models.ForeignKey(Device)
@@ -43,6 +58,13 @@ class BatteryCharge(models.Model):
     
     def __unicode__ (self):
         return str(self.device) + " " + str(self.battery_percentage) + "% at: " + str(self.sent_date_time)
+    
+    @staticmethod
+    def for_deployment(deployment):
+        start = datetime.combine(deployment.survey_start, time(0, 0, 0))
+        end = datetime.combine(deployment.survey_end, time(23, 59, 59))
+        return BatteryCharge.objects.filter(device=deployment.device, received_date_time__gt=start, received_date_time__lt=end)
+
 
 class DeviceEvent(models.Model):
     message = models.ForeignKey(Log)
@@ -55,3 +77,10 @@ class DeviceEvent(models.Model):
     
     def __unicode__ (self):
         return str(self.device) + " " + self.event + " at: " + str(self.sent_date_time)
+    
+    @staticmethod
+    def for_deployment(deployment):
+        start = datetime.combine(deployment.survey_start, time(0, 0, 0))
+        end = datetime.combine(deployment.survey_end, time(23, 59, 59))
+        return DeviceEvent.objects.filter(device=deployment.device, received_date_time__gt=start, received_date_time__lt=end)
+
