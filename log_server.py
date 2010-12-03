@@ -38,7 +38,7 @@ class GL100(LineReceiver):
         # Response types
         location_responses = {'GTLBC': "Location Base Call", 'GTTRI': "Timed Report Information",'GTSZI': "Safe Zone Information",'GTSOS': "Save Our Souls",'GTRTL': "Real Time Location"}
         power_responses = {'GTCBC': "Battery Check Response"}
-        event_responses = {'GTPNA': "Power On Alarm",'GTPFA': "Power Off Alarm",'GTPLA': "Power Low Alarm"}
+        event_responses = {'GTPNA': "Power On Alarm",'GTPFA': "Power Off Alarm",'GTPLA': "Power Low Alarm", 'GTBTC': "Start Charging Report", 'GTSTC': "Finish charging report"}
         general_information_responses = {'GTCID': "CID Info?",'GTHWV': "Hardware Information?", 'GTINF': "General Information?"}
         
         # Common header to all response types
