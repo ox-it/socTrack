@@ -65,11 +65,11 @@ def render_report(request, deployment):
     cluster_points = set([l for cluster in Cluster.for_deployment(deployment) for l in cluster.locations.all()])
     
     this_line = []
-    for location in Location.for_deployment(deployment).filter(accuracy__lt=THRESHOLD_ACCURACY):
+    for location in Location.for_deployment(deployment).filter(accuracy__lt=THRESHOLD_ACCURACY).order_by('sent_date_time'):
         if location in cluster_points:
             if len(this_line) > 2:
                 lines.append(this_line)
-                this_line = []
+            this_line = []
         else:
             if len(this_line) > 0:
                 if location.sent_date_time - this_line[-1].sent_date_time > timedelta(minutes=30):
