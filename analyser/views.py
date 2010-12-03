@@ -32,7 +32,8 @@ def render_kml(request, deployment):
     for location in Location.for_deployment(deployment).filter(accuracy__lt=THRESHOLD_ACCURACY).order_by('sent_date_time'):
         # Break up lines that have more than 30 minutes between points
         if last_point is not None and location.sent_date_time - last_point.sent_date_time > timedelta(minutes=30):
-            lines.append(this_line)
+            if len(this_line) > 1:
+                lines.append(this_line)
             this_line = []
         
         this_line.append(location)
@@ -74,7 +75,8 @@ def render_report(request, deployment):
                 if location.sent_date_time - this_line[-1].sent_date_time > timedelta(minutes=30):
                     lines.append(this_line)
                     this_line = []
-            this_line.append(location)
+            this_line.append(location)    
+    lines.append(this_line)
     
     context = {
         'clusters': Cluster.for_deployment(deployment),
