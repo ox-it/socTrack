@@ -1,0 +1,88 @@
+<!DOCTYPE html> 
+<html> 
+<head> 
+<meta name="viewport" content="initial-scale=1.0, user-scalable=no" /> 
+<meta http-equiv="content-type" content="text/html; charset=UTF-8"/> 
+<title>Location Analysis Report</title> 
+<link rel="stylesheet" href="{{ MEDIA_URL }}blueprint/screen.css" type="text/css" media="screen, projection">
+<link rel="stylesheet" href="{{ MEDIA_URL }}blueprint/print.css" type="text/css" media="print">
+<!--[if lt IE 8]>
+  <link rel="stylesheet" href="blueprint/ie.css" type="text/css" media="screen, projection">
+<![endif]-->
+<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script> 
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js"></script> 
+<script type="text/javascript"> 
+function initialize() {
+ 
+  var map = new google.maps.Map(document.getElementById("map_canvas"), {
+    zoom: 8,
+    center: new google.maps.LatLng({{ cluster_points.0 }}),
+    mapTypeId: google.maps.MapTypeId.ROADMAP
+  });
+  
+  var markers = []
+  
+  {% for cluster in cluster_points %}
+    var marker_{{ forloop.counter }} = new google.maps.Marker({
+        position: new google.maps.LatLng({{ cluster }}),
+        map: map,
+        icon: 'http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld={{ forloop.counter }}|FF0000|000000'
+    })
+    jQuery(function(){
+        jQuery('#cluster-{{ forloop.counter }}').click(function(){
+            map.setCenter(new google.maps.LatLng({{ cluster }}))
+            map.setZoom(14)
+            for (i in markers)
+            {
+                markers[i].setZIndex(0)
+            }
+            marker_{{ forloop.counter }}.setZIndex(10)
+        })
+    })
+    markers.push(marker_{{ forloop.counter }})
+  {% endfor %}
+  
+  {% for line in lines %}
+    new google.maps.Polyline({
+        path: [
+            {% for point in line %}
+                new google.maps.LatLng({{ point }}),
+            {% endfor %}
+        ],
+        map: map
+    })
+  {% endfor %}
+}
+</script> 
+</head> 
+<body onload="initialize()">
+    <div class="container">
+        <div class="span-24 last">
+            <h1>Location Analysis Report</h1>
+        </div>
+        <div id="map_canvas" class="span-24 last" style="height: 600px;"></div>
+        <div class="span-24 last">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Point ID</th>
+                        <th>From</th>
+                        <th>To</th>
+                        <th>Guessed Location</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for cluster in clusters %}
+                        <tr id="cluster-{{ forloop.counter }}">
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ cluster.youngest }}</td>
+                            <td>{{ cluster.eldest }}</td>
+                            <td>{{ cluster.geocoded }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body> 
+</html> 
