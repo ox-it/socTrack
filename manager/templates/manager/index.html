@@ -1,0 +1,70 @@
+<!DOCTYPE html> 
+<html> 
+<head> 
+<meta name="viewport" content="initial-scale=1.0, user-scalable=no" /> 
+<meta http-equiv="content-type" content="text/html; charset=UTF-8"/> 
+<title>Device Status</title> 
+<link rel="stylesheet" href="{{ MEDIA_URL }}blueprint/screen.css" type="text/css" media="screen, projection">
+<link rel="stylesheet" href="{{ MEDIA_URL }}blueprint/print.css" type="text/css" media="print">
+<!--[if lt IE 8]>
+  <link rel="stylesheet" href="{{ MEDIA_URL }}blueprint/ie.css" type="text/css" media="screen, projection">
+<![endif]-->
+</head> 
+<body>
+    <div class="container">
+        <div class="span-24 last">
+            <h1>Overview</h1>
+        </div>
+        <div class="span-16">
+            {% if danger_sim %}
+                <p>The following devices will need topping up soon:</p>
+                <ul>
+                {% for sim in danger_sim %}
+                    <li>{{ sim.local_id }} ({{ sim.phone_number }}) on {{ sim.data_plan_expiry }}</li>
+                {% endfor %}
+                </ul>
+            {% endif %}
+            {% if danger_device %}
+                <p>The following devices haven't been heard from in 12 hours:</p>
+                <ul>
+                {% for device in danger_device %}
+                    <li>{{ device.local_id }} ({{ device.imei }}) on {{ device.last_heard }}</li>
+                {% endfor %}
+                </ul>
+            {% endif %}
+        </div>
+        <div class="span-8 last">
+            <ul>
+                <li><a href="/admin/">Administration interface</a></li>
+            </ul>
+        </div>
+        <div class="span-24">
+            <h2>Deployments</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Deployment name</th>
+                        <th>Device</th>
+                        <th>SIM</th>
+                        <th>From</th>
+                        <th>To</th>
+                        <th>Reports</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for deployment in deployments %}
+                        <tr>
+                            <td>{{ deployment.name }}</td>
+                            <td><a href="manager/device/{{deployment.device.pk }}">{{ deployment.device.local_id }}</a></td>
+                            <td>{{ deployment.sim.local_id }}</td>
+                            <td>{{ deployment.survey_start }}</td>
+                            <td>{{ deployment.survey_end }}</td>
+                            <td><a href="analyser/{{ deployment.pk }}.html">View report</a><br/><a href="/analyser/{{ deployment.pk }}.kml">View raw data in Google Earth</a></td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body> 
+</html> 

@@ -6,6 +6,7 @@ from django.contrib import admin
 admin.autodiscover()
 
 urlpatterns = patterns('',
+    (r'^$', 'manager.views.render_index'),
     (r'^analyser/', include('analyser.urls')),
     (r'^logger/', include('logger.urls')),
     (r'^manager/', include('manager.urls')),
