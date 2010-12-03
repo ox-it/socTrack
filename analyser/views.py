@@ -79,6 +79,7 @@ def render_report(request, deployment):
     lines.append(this_line)
     
     context = {
+        'deployment': deployment,
         'clusters': Cluster.for_deployment(deployment),
         'cluster_points': [','.join(reversed([str(c) for c in MultiPoint([l.location for l in cluster.locations.all()]).centroid.coords])) for cluster in Cluster.for_deployment(deployment)],
         'lines': [[','.join(reversed([str(c) for c in l.location.coords])) for l in line] for line in lines]

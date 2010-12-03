@@ -1,0 +1,68 @@
+<!DOCTYPE html> 
+<html> 
+<head> 
+<meta name="viewport" content="initial-scale=1.0, user-scalable=no" /> 
+<meta http-equiv="content-type" content="text/html; charset=UTF-8"/> 
+<title>Device Status</title> 
+<link rel="stylesheet" href="{{ MEDIA_URL }}blueprint/screen.css" type="text/css" media="screen, projection">
+<link rel="stylesheet" href="{{ MEDIA_URL }}blueprint/print.css" type="text/css" media="print">
+<!--[if lt IE 8]>
+  <link rel="stylesheet" href="{{ MEDIA_URL }}blueprint/ie.css" type="text/css" media="screen, projection">
+<![endif]-->
+<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script> 
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js"></script> 
+<script type="text/javascript"> 
+function initialize() {
+ 
+  var map = new google.maps.Map(document.getElementById("map_canvas"), {
+    zoom: 14,
+    center: new google.maps.LatLng({{ last_location.1 }}, {{ last_location.0 }}),
+    mapTypeId: google.maps.MapTypeId.ROADMAP
+  });
+  
+  new google.maps.Marker({
+      position: new google.maps.LatLng({{ last_location.1 }}, {{ last_location.0 }}),
+      map: map
+  })
+}
+</script> 
+</head> 
+<body onload="initialize()">
+    <div class="container">
+        <div class="span-24 last">
+            <h1>Device Current Status: {{ device.local_id }} ({{ device.imei }})</h1>
+        </div>
+        <div id="map_canvas" class="span-16" style="height: 600px;"></div>
+        <div class="span-8 last">
+          <h2>Device Communications</h2>
+            <dl>
+              <dt>Last message received:</dt>
+                <dd>{{ last_log.message }}<br/><small>at {{ last_log.received_date_time }}</small></dd>
+              <dt>Last SMS sent</dt>
+                <dd>{{ last_sms.message }}<br/><br/>{{ last_sms.human_message }}<br/><small>at {{ last_sms.send_time }}<br/>{{ last_sms.response }}</small></dd>
+              <dd>
+          <h2>Battery Life</h2>
+          <img src="/logger/battery-charge/{{ device.pk }}.png"/>
+          <p>Current: {{ last_battery.battery_percentage }}%</p>
+        </div>
+        <div class="span-24 last">
+          <h2>Device Events</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Time</th>
+                <th>Event</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for event in device_events %}
+              <tr>
+                <td>{{ event.sent_date_time }}</td>
+                <td>{{ event.event }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+        </div>
+    </div>
+</body> 
+</html> 
