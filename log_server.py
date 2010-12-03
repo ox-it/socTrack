@@ -35,11 +35,13 @@ class GL100(LineReceiver):
         data = deque(raw.split(","))
         processed = dict()
         
-        # Response types
+        # Response types, missing GTGEO
         location_responses = {'GTLBC': "Location Base Call", 'GTTRI': "Timed Report Information",'GTSZI': "Safe Zone Information",'GTSOS': "Save Our Souls",'GTRTL': "Real Time Location"}
         power_responses = {'GTCBC': "Battery Check Response"}
         event_responses = {'GTPNA': "Power On Alarm",'GTPFA': "Power Off Alarm",'GTPLA': "Power Low Alarm", 'GTBTC': "Start Charging Report", 'GTSTC': "Finish charging report"}
-        general_information_responses = {'GTCID': "CID Info?",'GTHWV': "Hardware Information?", 'GTINF': "General Information?"}
+        general_information_responses = {'GTCID': "ICCID of Sim Card",'GTHWV': "Hardware Version", 'GTLGT': "Last successful GPS fix time",\
+                                         'GTINF': "General Information?", 'GTCSQ': "GSM Signal Level", 'GTSWV': "Software Version", \
+                                         'GTALL': "All Config Information", 'GTHBD': "GPRS Heartbeat/ping"}
         
         # Common header to all response types
         header_type, header_tail = data.popleft().split(":")
