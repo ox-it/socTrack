@@ -6,6 +6,8 @@ Requirements:
 * PostGIS / PostgreSQL
 * GeoDjango
 * Reverse Geocode branch of Geopy: pip install svn+http://geopy.googlecode.com/svn/branches/reverse-geocode
+* matlibplot
+
 Log Server
 ==========
 
