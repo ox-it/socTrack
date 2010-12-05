@@ -12,11 +12,12 @@ from manager.models import Device
 
 from datetime import datetime, timedelta
 
-THRESHOLD_DISTANCE = 0.15 # The radius points are allowed to be from each other to
+THRESHOLD_DISTANCE = 0.20 # The radius points are allowed to be from each other to
                         # be considered as part of a cluster
-THRESHOLD_TIME = 400 # This is the max time interval in minutes between points to be considered the same place
-THRESHOLD_ACCURACY = 5 # Only consider GPS points below this level of accuracy (NEMA standard)
-THRESHOLD_SPEED = 8 #KPH
+THRESHOLD_TIME = 480 # This is the max time interval in minutes between points to be considered the same place
+THRESHOLD_MIN_TIME = 60 # Minimum number of seconds for a point to be considered a 'point'
+THRESHOLD_ACCURACY = 10# Only consider GPS points below this level of accuracy (NEMA standard)
+THRESHOLD_SPEED = 10  #KPH
 
 class Command(BaseCommand):
     args = ''
@@ -37,15 +38,15 @@ class Command(BaseCommand):
 		location.end_date_time = location.sent_date_time
                
 	    # Keep iterating through gradually decreasing number of points until there has been no change since the last iteration  
-	    keep_filtering = True
+	    points_merged = True 
 	    iterations = 0
-            while keep_filtering == True:
+            while points_merged == True:
+		points_merged = False
 		iterations += 1
-                keep_filtering = False
 		j = 0
                 while j < len(locations) -1:
                     # Calculate time delta between the two points
-                    dTime = locations[j+1].sent_date_time - locations[j].sent_date_time
+                    dTime = locations[j+1].sent_date_time - locations[j].end_date_time
                     
                     if dTime < timedelta(minutes=THRESHOLD_TIME):
                         # Find distance betweeen the two points                    
@@ -62,10 +63,31 @@ class Command(BaseCommand):
                                 locations[j].points.append(point)
                             # Remove the second location as it has been merged with the first    
                             del locations[j+1]
-			    # Keep filtering as there has been a change made
-			    keep_filtering = True
+			    points_merged = True
                     j += 1
-            
+	   
+	    locations = [location for location in locations if (location.end_date_time - location.sent_date_time) > timedelta(seconds=THRESHOLD_MIN_TIME)]
+            	   
+	    points_merged = True
+            while points_merged == True:
+                points_merged = False
+		iterations +=1 
+    	        j = 0 
+	        while j < len(locations) - 1:
+	    	    dTime = locations[j+1].sent_date_time - locations[j].end_date_time	
+		    distance = haversine(locations[j].location, locations[j+1].location)
+		    if dTime < timedelta(minutes=THRESHOLD_TIME) and distance < THRESHOLD_DISTANCE:
+		 	locations[j].location = MultiPoint([locations[j].location, locations[j+1].location]).centroid
+			locations[j].altitude = (locations[j].altitude + locations[j+1].altitude) /2
+			locations[j].end_date_time = locations[j+1].end_date_time
+			locations[j].speed = (locations[j].speed + locations[j+1].speed) /2
+			for point in locations[j+1].points:
+				locations[j].points.append(point)
+			del locations[j+1]
+			points_merged = True
+		    j += 1
+	    
+
             for location in locations:
                 place = "Unknown location"
                 """if len(location.points) > 1: 
