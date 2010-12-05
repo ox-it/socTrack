@@ -62,32 +62,31 @@ class Command(BaseCommand):
         # Keep iterating through gradually decreasing number of points until there has been no change since the last iteration  
         points_merged = True 
         iterations = 0
-            while points_merged == True:
-        points_merged = False
-        iterations += 1
-        j = 0
-                while j < len(locations) -1:
-                    # Calculate time delta between the two points
-                    dTime = locations[j+1].sent_date_time - locations[j].end_date_time
+        while points_merged == True:
+            points_merged = False
+            iterations += 1
+            j = 0
+            while j < len(locations) -1:
+                j += 1
+                # Calculate time delta between the two points
+                dTime = locations[j+1].sent_date_time - locations[j].end_date_time    
+                if dTime < timedelta(minutes=THRESHOLD_TIME):
+                    # Find distance betweeen the two points                    
+                    distance = haversine(locations[j].location, locations[j+1].location)
+                    if distance < THRESHOLD_DISTANCE:
+                        # Find average of the two points
+                        locations[j].location = MultiPoint([locations[j].location, locations[j+1].location]).centroid
+                        # Save average point and set the point end_time to the send time of the second point
+                        locations[j].altitude = (locations[j].altitude + locations[j+1].altitude) / 2
+                        locations[j].end_date_time = locations[j+1].end_date_time
+                        locations[j].speed = (locations[j].speed + locations[j+1].speed) /2
+                        # Add all the collected points to the new cluster
+                        for point in locations[j+1].points:
+                            locations[j].points.append(point)
+                        # Remove the second location as it has been merged with the first    
+                        del locations[j+1]
+                        points_merged = True
                     
-                    if dTime < timedelta(minutes=THRESHOLD_TIME):
-                        # Find distance betweeen the two points                    
-                        distance = haversine(locations[j].location, locations[j+1].location)
-                        if distance < THRESHOLD_DISTANCE:
-                            # Find average of the two points
-                            locations[j].location = MultiPoint([locations[j].location, locations[j+1].location]).centroid
-                            # Save average point and set the point end_time to the send time of the second point
-                            locations[j].altitude = (locations[j].altitude + locations[j+1].altitude) / 2
-                            locations[j].end_date_time = locations[j+1].end_date_time
-                            locations[j].speed = (locations[j].speed + locations[j+1].speed) /2
-                # Add all the collected points to the new cluster
-                            for point in locations[j+1].points:
-                                locations[j].points.append(point)
-                            # Remove the second location as it has been merged with the first    
-                            del locations[j+1]
-                points_merged = True
-                    j += 1
-       
         locations = [location for location in locations if (location.end_date_time - location.sent_date_time) > timedelta(seconds=THRESHOLD_MIN_TIME)]
         
         locations, iterations = merge_points(locations) 
