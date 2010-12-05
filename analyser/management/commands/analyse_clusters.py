@@ -55,9 +55,9 @@ class Command(BaseCommand):
             locations = [location for location in query]
            
         # Set each potential cluster with a starting point of itself 
-            for location in locations:
-                location.points = [location]
-        location.end_date_time = location.sent_date_time
+        for location in locations:
+            location.points = [location]
+            location.end_date_time = location.sent_date_time
                
         # Keep iterating through gradually decreasing number of points until there has been no change since the last iteration  
         points_merged = True 
