@@ -19,31 +19,30 @@ THRESHOLD_MIN_TIME = 60 # Minimum number of seconds for a point to be considered
 THRESHOLD_ACCURACY = 10# Only consider GPS points below this level of accuracy (NEMA standard)
 THRESHOLD_SPEED = 10  #KPH
 
+def merge_points(self, locations):
+    points_merged = True
+    while points_merged == True:
+        points_merged = False
+        iterations +=1 
+        j = 0 
+        while j < len(locations) - 1:
+            dTime = locations[j+1].sent_date_time - locations[j].end_date_time  
+            distance = haversine(locations[j].location, locations[j+1].location)
+            if dTime < timedelta(minutes=THRESHOLD_TIME) and distance < THRESHOLD_DISTANCE:
+                locations[j].location = MultiPoint([locations[j].location, locations[j+1].location]).centroid
+                locations[j].altitude = (locations[j].altitude + locations[j+1].altitude) /2
+                locations[j].end_date_time = locations[j+1].end_date_time
+                locations[j].speed = (locations[j].speed + locations[j+1].speed) /2
+                for point in locations[j+1].points:
+                    locations[j].points.append(point)
+                del locations[j+1]
+                points_merged = True
+            j += 1
+    return locations, iterations
+    
 class Command(BaseCommand):
     args = ''
-    help = 'Analyses location data and creates clusters'
-    
-    def merge_points(locations):
-        points_merged = True
-        while points_merged == True:
-            points_merged = False
-            iterations +=1 
-            j = 0 
-            while j < len(locations) - 1:
-                dTime = locations[j+1].sent_date_time - locations[j].end_date_time  
-                distance = haversine(locations[j].location, locations[j+1].location)
-                if dTime < timedelta(minutes=THRESHOLD_TIME) and distance < THRESHOLD_DISTANCE:
-                    locations[j].location = MultiPoint([locations[j].location, locations[j+1].location]).centroid
-                    locations[j].altitude = (locations[j].altitude + locations[j+1].altitude) /2
-                    locations[j].end_date_time = locations[j+1].end_date_time
-                    locations[j].speed = (locations[j].speed + locations[j+1].speed) /2
-                    for point in locations[j+1].points:
-                        locations[j].points.append(point)
-                    del locations[j+1]
-                    points_merged = True
-                j += 1
-        return locations, iterations
-                
+    help = 'Analyses location data and creates clusters'          
         
     def handle(self, *args, **options):
         # Remove existing clusters
