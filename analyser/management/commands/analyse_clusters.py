@@ -17,31 +17,32 @@ THRESHOLD_DISTANCE = 0.15 # The radius points are allowed to be from each other 
 THRESHOLD_TIME = 400 # This is the max time interval in minutes between points to be considered the same place
 THRESHOLD_ACCURACY = 5 # Only consider GPS points below this level of accuracy (NEMA standard)
 THRESHOLD_SPEED = 8 #KPH
-ITERATIONS = 20
 
 class Command(BaseCommand):
     args = ''
     help = 'Analyses location data and creates clusters'
 
     def handle(self, *args, **options):
-        
+	# Remove existing clusters
         Cluster.objects.all().delete()
         
         # Consider each device one at a time
         for device in Device.objects.all():
-            # TODO Implement last chance?: last_chance = False
-            query = Location.objects.filter(device=device, sent_date_time__lt=datetime.now() - timedelta(hours=-1), accuracy__lt=THRESHOLD_ACCURACY).order_by('sent_date_time')
+            query = Location.objects.filter(device=device, sent_date_time__lt=datetime.now() - timedelta(hours=-1), accuracy__lt=THRESHOLD_ACCURACY, speed__lt=THRESHOLD_SPEED).order_by('sent_date_time')
             locations = [location for location in query]
-            
-            locations = [location for location in locations if location.accuracy < THRESHOLD_ACCURACY]
-            locations = [location for location in locations if location.speed < THRESHOLD_SPEED]
-            
+           
+	    # Set each potential cluster with a starting point of itself 
             for location in locations:
                 location.points = [location]
-                
-            
-            for i in range(ITERATIONS):
-                j = 0
+		location.end_date_time = location.sent_date_time
+               
+	    # Keep iterating through gradually decreasing number of points until there has been no change since the last iteration  
+	    keep_filtering = True
+	    iterations = 0
+            while keep_filtering == True:
+		iterations += 1
+                keep_filtering = False
+		j = 0
                 while j < len(locations) -1:
                     # Calculate time delta between the two points
                     dTime = locations[j+1].sent_date_time - locations[j].sent_date_time
@@ -51,16 +52,18 @@ class Command(BaseCommand):
                         distance = haversine(locations[j].location, locations[j+1].location)
                         if distance < THRESHOLD_DISTANCE:
                             # Find average of the two points
-                            average_point = MultiPoint([locations[j].location, locations[j+1].location]).centroid
+                            locations[j].location = MultiPoint([locations[j].location, locations[j+1].location]).centroid
                             # Save average point and set the point end_time to the send time of the second point
-                            locations[j].location = average_point
                             locations[j].altitude = (locations[j].altitude + locations[j+1].altitude) / 2
-                            locations[j].end_time = locations[j+1].sent_date_time
+                            locations[j].end_date_time = locations[j+1].end_date_time
                             locations[j].speed = (locations[j].speed + locations[j+1].speed) /2
+			    # Add all the collected points to the new cluster
                             for point in locations[j+1].points:
                                 locations[j].points.append(point)
-                                
+                            # Remove the second location as it has been merged with the first    
                             del locations[j+1]
+			    # Keep filtering as there has been a change made
+			    keep_filtering = True
                     j += 1
             
             for location in locations:
@@ -73,13 +76,13 @@ class Command(BaseCommand):
                         place = "Unable to geocode"
                 """
                 
-                c = Cluster(geocoded=place, device=device)
+                c = Cluster(geocoded=place, device=device, location=location.location, speed=location.speed, altitude=location.altitude)
                 c.save()
                 c.locations = location.points
                 c.save()
-		#c.location = location
+		
             
-            print device.local_id + " points created: " + str(len(locations))
+            print device.local_id + " points created: " + str(len(locations)) + " iterations: " + str(iterations)
                 
                 
 """

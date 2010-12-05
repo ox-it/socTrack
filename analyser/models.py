@@ -1,12 +1,16 @@
 from datetime import datetime, time
 
-from django.db import models
+from django.contrib.gis.db import models
 
 from logger.models import Location
 from manager.models import Device
 
 class Cluster(models.Model):
-#    location = Location()
+    # The average speed, altitude and location between points - NOT the same as a centroid on locations
+    speed = models.DecimalField(max_digits=8, decimal_places=1)
+    altitude = models.FloatField()
+    location = models.PointField()
+
     locations = models.ManyToManyField(Location, help_text="The location reports which make up this cluster")
     geocoded = models.TextField(help_text="A human readable name identifying the location of this cluster")
     device = models.ForeignKey(Device)

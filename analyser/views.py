@@ -13,7 +13,7 @@ from logger.models import Location
 
 @login_required
 def render_kml(request, deployment):
-    
+    # TODO - Use the new algorithm/method here.  
     deployment = get_object_or_404(Deployment, pk=deployment)
     
     clusters = []
@@ -58,7 +58,7 @@ def render_kml(request, deployment):
 
 @login_required
 def render_report(request, deployment):
-    
+    # Tim's new method
     deployment = get_object_or_404(Deployment, pk=deployment)
     
     lines = []
@@ -78,10 +78,12 @@ def render_report(request, deployment):
             this_line.append(location)    
     lines.append(this_line)
     
+    cluster_points = [str(cluster.location.coords[1]) + "," + str(cluster.location.coords[0]) for cluster in Cluster.for_deployment(deployment)] 
     context = {
         'deployment': deployment,
         'clusters': Cluster.for_deployment(deployment),
-        'cluster_points': [','.join(reversed([str(c) for c in MultiPoint([l.location for l in cluster.locations.all()]).centroid.coords])) for cluster in Cluster.for_deployment(deployment)],
+        'cluster_points': cluster_points,
+        #'cluster_points': [','.join(reversed([str(c) for c in MultiPoint([l.location for l in cluster.locations.all()]).centroid.coords])) for cluster in Cluster.for_deployment(deployment)],
         'lines': [[','.join(reversed([str(c) for c in l.location.coords])) for l in line] for line in lines]
     }
     
