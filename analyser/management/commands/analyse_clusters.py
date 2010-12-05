@@ -22,9 +22,31 @@ THRESHOLD_SPEED = 10  #KPH
 class Command(BaseCommand):
     args = ''
     help = 'Analyses location data and creates clusters'
-
+    
+    def merge_points(locations):
+        points_merged = True
+        while points_merged == True:
+            points_merged = False
+            iterations +=1 
+            j = 0 
+            while j < len(locations) - 1:
+                j += 1
+                dTime = locations[j+1].sent_date_time - locations[j].end_date_time  
+                distance = haversine(locations[j].location, locations[j+1].location)
+                if dTime < timedelta(minutes=THRESHOLD_TIME) and distance < THRESHOLD_DISTANCE:
+                    locations[j].location = MultiPoint([locations[j].location, locations[j+1].location]).centroid
+                    locations[j].altitude = (locations[j].altitude + locations[j+1].altitude) /2
+                    locations[j].end_date_time = locations[j+1].end_date_time
+                    locations[j].speed = (locations[j].speed + locations[j+1].speed) /2
+                    for point in locations[j+1].points:
+                        locations[j].points.append(point)
+                    del locations[j+1]
+                    points_merged = True
+        return locations, iterations
+                
+        
     def handle(self, *args, **options):
-	# Remove existing clusters
+    # Remove existing clusters
         Cluster.objects.all().delete()
         
         # Consider each device one at a time
@@ -32,18 +54,18 @@ class Command(BaseCommand):
             query = Location.objects.filter(device=device, sent_date_time__lt=datetime.now() - timedelta(hours=-1), accuracy__lt=THRESHOLD_ACCURACY, speed__lt=THRESHOLD_SPEED).order_by('sent_date_time')
             locations = [location for location in query]
            
-	    # Set each potential cluster with a starting point of itself 
+        # Set each potential cluster with a starting point of itself 
             for location in locations:
                 location.points = [location]
-		location.end_date_time = location.sent_date_time
+        location.end_date_time = location.sent_date_time
                
-	    # Keep iterating through gradually decreasing number of points until there has been no change since the last iteration  
-	    points_merged = True 
-	    iterations = 0
+        # Keep iterating through gradually decreasing number of points until there has been no change since the last iteration  
+        points_merged = True 
+        iterations = 0
             while points_merged == True:
-		points_merged = False
-		iterations += 1
-		j = 0
+        points_merged = False
+        iterations += 1
+        j = 0
                 while j < len(locations) -1:
                     # Calculate time delta between the two points
                     dTime = locations[j+1].sent_date_time - locations[j].end_date_time
@@ -58,51 +80,33 @@ class Command(BaseCommand):
                             locations[j].altitude = (locations[j].altitude + locations[j+1].altitude) / 2
                             locations[j].end_date_time = locations[j+1].end_date_time
                             locations[j].speed = (locations[j].speed + locations[j+1].speed) /2
-			    # Add all the collected points to the new cluster
+                # Add all the collected points to the new cluster
                             for point in locations[j+1].points:
                                 locations[j].points.append(point)
                             # Remove the second location as it has been merged with the first    
                             del locations[j+1]
-			    points_merged = True
+                points_merged = True
                     j += 1
-	   
-	    locations = [location for location in locations if (location.end_date_time - location.sent_date_time) > timedelta(seconds=THRESHOLD_MIN_TIME)]
-            	   
-	    points_merged = True
-            while points_merged == True:
-                points_merged = False
-		iterations +=1 
-    	        j = 0 
-	        while j < len(locations) - 1:
-	    	    dTime = locations[j+1].sent_date_time - locations[j].end_date_time	
-		    distance = haversine(locations[j].location, locations[j+1].location)
-		    if dTime < timedelta(minutes=THRESHOLD_TIME) and distance < THRESHOLD_DISTANCE:
-		 	locations[j].location = MultiPoint([locations[j].location, locations[j+1].location]).centroid
-			locations[j].altitude = (locations[j].altitude + locations[j+1].altitude) /2
-			locations[j].end_date_time = locations[j+1].end_date_time
-			locations[j].speed = (locations[j].speed + locations[j+1].speed) /2
-			for point in locations[j+1].points:
-				locations[j].points.append(point)
-			del locations[j+1]
-			points_merged = True
-		    j += 1
-	    
+       
+        locations = [location for location in locations if (location.end_date_time - location.sent_date_time) > timedelta(seconds=THRESHOLD_MIN_TIME)]
+        
+        locations, iterations = merge_points(locations) 
 
-            for location in locations:
-                place = "Unknown location"
-                """if len(location.points) > 1: 
-                    geocoder = geocoders.Google(secrets['GOOGLE'])
-                    try:
-                        place, point = geocoder.reverse((location.location[1], location.location[0]))
-                    except IndexError:
-                        place = "Unable to geocode"
-                """
-                
-                c = Cluster(geocoded=place, device=device, location=location.location, speed=location.speed, altitude=location.altitude)
-                c.save()
-                c.locations = location.points
-                c.save()
-		
+        for location in locations:
+            place = "Unknown location"
+            """if len(location.points) > 1: 
+                geocoder = geocoders.Google(secrets['GOOGLE'])
+                try:
+                    place, point = geocoder.reverse((location.location[1], location.location[0]))
+                except IndexError:
+                    place = "Unable to geocode"
+            """
+            
+            c = Cluster(geocoded=place, device=device, location=location.location, speed=location.speed, altitude=location.altitude)
+            c.save()
+            c.locations = location.points
+            c.save()
+        
             
             print device.local_id + " points created: " + str(len(locations)) + " iterations: " + str(iterations)
                 
