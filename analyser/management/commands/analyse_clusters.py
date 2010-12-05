@@ -30,7 +30,6 @@ class Command(BaseCommand):
             iterations +=1 
             j = 0 
             while j < len(locations) - 1:
-                j += 1
                 dTime = locations[j+1].sent_date_time - locations[j].end_date_time  
                 distance = haversine(locations[j].location, locations[j+1].location)
                 if dTime < timedelta(minutes=THRESHOLD_TIME) and distance < THRESHOLD_DISTANCE:
@@ -42,11 +41,12 @@ class Command(BaseCommand):
                         locations[j].points.append(point)
                     del locations[j+1]
                     points_merged = True
+                j += 1
         return locations, iterations
                 
         
     def handle(self, *args, **options):
-    # Remove existing clusters
+        # Remove existing clusters
         Cluster.objects.all().delete()
         
         # Consider each device one at a time
@@ -67,7 +67,6 @@ class Command(BaseCommand):
             iterations += 1
             j = 0
             while j < len(locations) -1:
-                j += 1
                 # Calculate time delta between the two points
                 dTime = locations[j+1].sent_date_time - locations[j].end_date_time    
                 if dTime < timedelta(minutes=THRESHOLD_TIME):
@@ -86,6 +85,7 @@ class Command(BaseCommand):
                         # Remove the second location as it has been merged with the first    
                         del locations[j+1]
                         points_merged = True
+                j += 1
                     
         locations = [location for location in locations if (location.end_date_time - location.sent_date_time) > timedelta(seconds=THRESHOLD_MIN_TIME)]
         
