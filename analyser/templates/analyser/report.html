@@ -44,6 +44,7 @@ function initialize() {
   
   {% for line in lines %}
     new google.maps.Polyline({
+	strokeOpacity: 0.5,
         path: [
             {% for point in line %}
                 new google.maps.LatLng({{ point }}),
