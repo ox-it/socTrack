@@ -1,6 +1,7 @@
 from datetime import datetime, time
 
 from django.contrib.gis.db import models
+from django.utils.timesince import timesince
 
 from logger.models import Location
 from manager.models import Device
@@ -30,3 +31,7 @@ class Cluster(models.Model):
     
     def eldest(self):
         return max([l.sent_date_time for l in self.locations.all()])
+    
+    def duration(self):
+        print timesince(self.youngest(), self.eldest())
+        return timesince(self.youngest(), self.eldest())

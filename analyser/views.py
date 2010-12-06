@@ -66,7 +66,8 @@ def render_report(request, deployment):
             y, m, d = map(int, view_date.split('-'))
             dtl = datetime(y, m, d)
             dth = datetime(y, m, d) + timedelta(days=1)
-        except IndexError:
+        except ValueError, IndexError:
+            view_date = None
             pass
     
     lines = []
@@ -92,18 +93,16 @@ def render_report(request, deployment):
     
     clusters = []
     for cluster in Cluster.for_deployment(deployment):
-        eldest = max([l.sent_date_time for l in cluster.locations.all()])
-        youngest = min([l.sent_date_time for l in cluster.locations.all()])
-        if view_date is None or ((eldest < dth and eldest > dtl) or (youngest > dtl and youngest < dth)):
+        if view_date is None or ((cluster.eldest() < dth and cluster.eldest() > dtl) or (cluster.youngest() > dtl and cluster.youngest() < dth)):
             cluster.centre = str(cluster.location.coords[1]) + "," + str(cluster.location.coords[0])
-            cluster.heat = "%02X" % max(255 - ((float((eldest - youngest).seconds) / 14400) * 256), 0)
+            cluster.heat = "%02X" % max(255 - ((float((cluster.eldest() - cluster.youngest()).seconds) / 14400) * 256), 0)
             clusters.append(cluster)
     
     context = {
         'dates': sorted(dates),
         'view_date': view_date,
         'deployment': deployment,
-        'clusters': sorted(clusters, key=lambda cluster: max([l.sent_date_time for l in cluster.locations.all()])),
+        'clusters': sorted(clusters, key=lambda cluster: cluster.youngest()),
         'lines': [[','.join(reversed([str(c) for c in l.location.coords])) for l in line] for line in lines]
     }
     

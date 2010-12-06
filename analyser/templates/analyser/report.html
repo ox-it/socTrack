@@ -66,7 +66,7 @@ function initialize() {
             <select name="date">
               <option>All</option>
               {% for date in dates %}
-                <option value="{{ date|date:'Y-m-d' }}"{% if date == view_date %}selected="selected"{% endif %}>{{ date|date:'jS F Y' }}</option>
+                <option value="{{ date|date:'Y-m-d' }}"{% if date == view_date %} selected="selected"{% endif %}>{{ date|date:'jS F Y' }}</option>
               {% endfor %}
             </select>
             <input type="submit" value="Go" />
@@ -78,8 +78,8 @@ function initialize() {
                 <thead>
                     <tr>
                         <th>Point ID</th>
-                        <th>From</th>
-                        <th>To</th>
+                        <th>From<br/>To</th>
+                        <th>Duration</th>
                         <th>Guessed Location</th>
                     </tr>
                 </thead>
@@ -87,8 +87,44 @@ function initialize() {
                     {% for cluster in clusters %}
                         <tr id="cluster-{{ forloop.counter }}">
                             <td>{{ forloop.counter }}</td>
-                            <td>{{ cluster.youngest }}</td>
-                            <td>{{ cluster.eldest }}</td>
+                            
+                              <td>{% ifequal cluster.youngest|date:"dMY" cluster.eldest|date:"dMY" %}
+                                {# 1. If start and end time are on the same day #}
+                                {# Date - Month #}
+                                {{ cluster.youngest|date:"j M"}}
+                                {# Only show year if start date is not in this year #}
+                                 {% ifnotequal cluster.youngest|date:"Y" now|date:"Y"%}
+                                   {{ cluster.youngest|date:"Y"}}
+                                 {% endifnotequal %}
+                          
+                                {# Day - Time #}
+                          
+                                {% ifequal cluster.youngest|date:"A" cluster.eldest|date:"A"  %}
+                                    {# If start and end times are both am or pm #}
+                                    {{ cluster.youngest|date:"g:i"|lower }}-{{ cluster.eldest|date:"g:iA"|lower }}
+                                    {% else %}
+                                    {{ cluster.youngest|date:"g:iA"|lower }}-{{ cluster.eldest|date:"g:iA"|lower }}
+                                {% endifequal %}
+                                {# 1. END #}
+                          
+                              {% else %}
+                                {# Handle the rare occurence that tutorials start and end on different days #}
+                                  {% ifequal cluster.youngest|date:"Y" cluster.eldest|date:"Y" %}
+                                      {% ifequal cluster.youngest|date:"Y" now|date:"Y" %}
+                                      {# Event starts this year and finishes this year %}
+                                          {{ cluster.youngest|date:"j M" }}, {{ cluster.youngest|date:"g:iA"|lower}}-
+                                          <br />{{ cluster.eldest|date:"j M" }}, {{ cluster.eldest|date:"g:iA"|lower}}
+                                      {% else %}
+                                      {# Event starts in a different year but finishes in that year too #}
+                                          {{ cluster.youngest|date:"j M y" }}, {{ cluster.youngest|date:"g:iA"|lower}}-
+                                          <br />{{ cluster.eldest|date:"j M y" }}, {{ cluster.eldest|date:"g:iA"|lower}}
+                                      {% endifequal %}
+                                  {% else %}
+                                      {{ cluster.youngest|date:"j M y" }}, {{ cluster.youngest|date:"g:iA"|lower}}-
+                                      <br />{{ cluster.eldest|date:"j M y" }}, {{ cluster.eldest|date:"g:iA"|lower}}
+                                  {% endifequal %}
+                              {% endifequal %}</td>
+                            <td>{{ cluster.duration }}</td>
                             <td>{{ cluster.geocoded }}</td>
                         </tr>
                     {% endfor %}
