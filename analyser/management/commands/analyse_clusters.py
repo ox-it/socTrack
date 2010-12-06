@@ -67,14 +67,11 @@ class Command(BaseCommand):
             locations, passtwo = merge_points(locations) 
             
             for location in locations:
-                place = "Unknown location"
-                """if len(location.points) > 1: 
-                    geocoder = geocoders.Google(secrets['GOOGLE'])
-                    try:
-                        place, point = geocoder.reverse((location.location[1], location.location[0]))
-                    except IndexError:
-                        place = "Unable to geocode"
-                """
+                geocoder = geocoders.Google(secrets['GOOGLE'])
+                try:
+                    place, point = geocoder.reverse((location.location[1], location.location[0]))
+                except IndexError:
+                    place = "Unknown location"
             
                 c = Cluster(geocoded=place, device=device, location=location.location, speed=location.speed, altitude=location.altitude)
                 c.save()
@@ -83,57 +80,3 @@ class Command(BaseCommand):
         
             
             print device.local_id + " points created: " + str(len(locations)) + " pass one iterations: " + str(passone) + " pass two iterations: " + str(passtwo)
-                
-                
-"""
-    # Start a new cluster to be considered if the current one is empty
-    if len(current_cluster_locations) == 0:
-        current_cluster_locations.add(location)
-        current_cluster = Point(location.location)
-    
-    else:
-        
-        # Check whether this point could be considered to be a member of this cluster
-        distance = haversine(current_cluster.centroid, location.location)
-        if distance < THRESHOLD_DISTANCE:
-            # Good, our cluster just got bigger
-            current_cluster_locations.add(location)
-            current_cluster = MultiPoint([current_cluster, location.location])
-            last_chance = True
-        else:
-            # If this is the first outlier, then just move on to the next one
-            if not last_chance:
-                last_chance = False
-            # If we've no more chances, and we haven't had a point in
-            # this cluster for THRESHOLD_TIME minutes, then give it up
-            elif max([l.sent_date_time for l in current_cluster_locations]) + timedelta(minutes=THRESHOLD_TIME) < location.sent_date_time:
-                # We've missed our chances, that's the end of this cluster
-                # Figure out if we've stayed in this spot long enough
-                start = min([l.sent_date_time for l in current_cluster_locations])
-                end = max([l.sent_date_time for l in current_cluster_locations])
-                if end - start > timedelta(minutes=THRESHOLD_TIME):
-                    # We've got a cluster - geocode it
-                    geocoder = geocoders.Google(secrets['GOOGLE'])
-                    (new_place, new_point) = geocoder.reverse((current_cluster.centroid[1], current_cluster.centroid[0]))
-                    
-                    c = Cluster(geocoded=new_place, device=device)
-                    c.save()
-                    c.locations = current_cluster_locations
-                    c.save()
-                    print "Identified a cluster as", new_place
-           
-                # Clear and go on to our next cluster
-                current_cluster_locations = set((location,))
-                current_cluster = Point(location.location)
-                print location.sent_date_time
-                print "New cluster!"
-                last_chance = True
-        
-    location.save()
-
-# Mark the currently considered cluster as unanalysed, because it
-# may continue into the future past what's currently being analysed
-for location in current_cluster_locations:
-    location.analysed = False
-    location.save()
-"""
