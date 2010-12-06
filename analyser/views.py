@@ -8,7 +8,7 @@ from django.template import RequestContext
 
 from manager.models import Deployment
 from analyser.models import Cluster
-from analyser.analyse import THRESHOLD_ACCURACY
+from analyser.analyse import analyse, THRESHOLD_ACCURACY
 from logger.models import Location
 
 @login_required
@@ -69,6 +69,9 @@ def render_report(request, deployment):
         except ValueError, IndexError:
             view_date = None
             pass
+    
+    if request.GET.get('regenerate') is not None:
+        analyse(deployment.device)
     
     lines = []
     cluster_points = set([l for cluster in Cluster.for_deployment(deployment) for l in cluster.locations.all()])
