@@ -16,21 +16,21 @@ function initialize() {
  
   var map = new google.maps.Map(document.getElementById("map_canvas"), {
     zoom: 8,
-    center: new google.maps.LatLng({{ cluster_points.0 }}),
+    center: new google.maps.LatLng({{ clusters.0.centre }}),
     mapTypeId: google.maps.MapTypeId.ROADMAP
   });
   
   var markers = []
   
-  {% for cluster in cluster_points %}
+  {% for cluster in clusters %}
     var marker_{{ forloop.counter }} = new google.maps.Marker({
-        position: new google.maps.LatLng({{ cluster }}),
+        position: new google.maps.LatLng({{ cluster.centre }}),
         map: map,
-        icon: 'http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld={{ forloop.counter }}|FF0000|000000'
+        icon: 'http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld={{ forloop.counter }}|FF{{ cluster.heat }}{{ cluster.heat }}|000000'
     })
     jQuery(function(){
         jQuery('#cluster-{{ forloop.counter }}').click(function(){
-            map.setCenter(new google.maps.LatLng({{ cluster }}))
+            map.setCenter(new google.maps.LatLng({{ cluster.centre }}))
             map.setZoom(14)
             for (i in markers)
             {

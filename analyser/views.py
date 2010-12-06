@@ -78,12 +78,15 @@ def render_report(request, deployment):
             this_line.append(location)    
     lines.append(this_line)
     
-    cluster_points = [str(cluster.location.coords[1]) + "," + str(cluster.location.coords[0]) for cluster in Cluster.for_deployment(deployment)] 
+    clusters = Cluster.for_deployment(deployment)
+    for cluster in clusters:
+        cluster.centre = str(cluster.location.coords[1]) + "," + str(cluster.location.coords[0])
+        time_in_cluster = max([l.sent_date_time for l in cluster.locations.all()]) - min([l.sent_date_time for l in cluster.locations.all()])
+        cluster.heat = "%02X" % max(255 - ((float(time_in_cluster.seconds) / 14400) * 256), 0)
+        print ((float(time_in_cluster.seconds) / 14400) * 256), ("%02X" % max(255 - ((float(time_in_cluster.seconds) / 14400) * 256), 0))
     context = {
         'deployment': deployment,
-        'clusters': Cluster.for_deployment(deployment),
-        'cluster_points': cluster_points,
-        #'cluster_points': [','.join(reversed([str(c) for c in MultiPoint([l.location for l in cluster.locations.all()]).centroid.coords])) for cluster in Cluster.for_deployment(deployment)],
+        'clusters': clusters,
         'lines': [[','.join(reversed([str(c) for c in l.location.coords])) for l in line] for line in lines]
     }
     
