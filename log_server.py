@@ -50,6 +50,9 @@ class GL100(LineReceiver):
             'raw': raw
         })
         
+        if header_type.startswith('#BUF#'):
+            header_type = header_type[5:]
+        
         if header_type == '+RESP':
             
             # Location Responses 
