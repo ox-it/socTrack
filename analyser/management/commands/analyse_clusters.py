@@ -8,8 +8,6 @@ class Command(BaseCommand):
     help = 'Analyses location data and creates clusters'          
         
     def handle(self, *args, **options):
-        # Remove existing clusters
-        Cluster.objects.all().delete()
         
         # Consider each device one at a time
         for device in Device.objects.all():

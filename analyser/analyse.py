@@ -40,6 +40,7 @@ def merge_points(locations):
     return locations, iterations
 
 def analyse(device):
+    Cluster.objects.filter(device=device).delete()
     query = Location.objects.filter(device=device, sent_date_time__lt=datetime.now() - timedelta(hours=-1), accuracy__lt=THRESHOLD_ACCURACY, speed__lt=THRESHOLD_SPEED).order_by('sent_date_time')
     locations = [location for location in query]
    
