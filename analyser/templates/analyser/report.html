@@ -58,8 +58,19 @@ function initialize() {
 </head> 
 <body onload="initialize()">
     <div class="container">
-        <div class="span-24 last">
+        <div class="span-18">
             <h1>Location Analysis Report: {{ deployment.name }}</h1>
+        </div>
+        <div class="span-6 last">
+          <form method="get" action="{{ request.path }}">
+            <select name="date">
+              <option>All</option>
+              {% for date in dates %}
+                <option value="{{ date|date:'Y-m-d' }}"{% if date == view_date %}selected="selected"{% endif %}>{{ date|date:'jS F Y' }}</option>
+              {% endfor %}
+            </select>
+            <input type="submit" value="Go" />
+          </form>
         </div>
         <div id="map_canvas" class="span-12" style="height: 600px;"></div>
         <div class="span-12 last">
