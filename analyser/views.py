@@ -68,7 +68,6 @@ def render_report(request, deployment):
             dth = datetime(y, m, d) + timedelta(days=1)
         except ValueError, IndexError:
             view_date = None
-            pass
     
     if request.GET.get('regenerate') is not None:
         analyse(deployment.device)

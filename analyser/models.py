@@ -33,5 +33,4 @@ class Cluster(models.Model):
         return max([l.sent_date_time for l in self.locations.all()])
     
     def duration(self):
-        print timesince(self.youngest(), self.eldest())
         return timesince(self.youngest(), self.eldest())
