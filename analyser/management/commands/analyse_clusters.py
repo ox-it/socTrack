@@ -63,9 +63,9 @@ class Command(BaseCommand):
             # Keep iterating through gradually decreasing number of points until there has been no change since the last iteration  
             locations, passone = merge_points(locations)
             locations = [location for location in locations if (location.end_date_time - location.sent_date_time) > timedelta(seconds=THRESHOLD_MIN_TIME)]
-      	    locations = sorted(locations, key=lambda location: location.sent_date_time) 
+            locations = sorted(locations, key=lambda location: location.sent_date_time) 
             locations, passtwo = merge_points(locations) 
-
+            
             for location in locations:
                 place = "Unknown location"
                 """if len(location.points) > 1: 
