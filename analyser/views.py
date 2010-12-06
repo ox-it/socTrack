@@ -8,7 +8,7 @@ from django.template import RequestContext
 
 from manager.models import Deployment
 from analyser.models import Cluster
-from analyser.management.commands.analyse_clusters import THRESHOLD_ACCURACY
+from analyser.analyse import THRESHOLD_ACCURACY
 from logger.models import Location
 
 @login_required
