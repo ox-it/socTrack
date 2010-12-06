@@ -1,15 +1,16 @@
+from django.shortcuts import get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.http import HttpResponse
+
+from manager.models import Device
+from logger.models import BatteryCharge
+
+
 try:
     from matplotlib.figure import Figure
     from matplotlib.dates import DateFormatter
     from matplotlib.ticker import FixedLocator
     from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
-
-    from django.shortcuts import get_object_or_404
-    from django.contrib.auth.decorators import login_required
-    from django.http import HttpResponse
-    
-    from manager.models import Device
-    from logger.models import BatteryCharge
     
     @login_required
     def render_battery_chart(request, device):
@@ -28,4 +29,6 @@ try:
         return response
     
 except ImportError:
-    pass
+    @login_required
+    def render_battery_chart(request, device):
+        pass
