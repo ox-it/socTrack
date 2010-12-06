@@ -16,21 +16,21 @@ function initialize() {
  
   var map = new google.maps.Map(document.getElementById("map_canvas"), {
     zoom: 8,
-    center: new google.maps.LatLng({{ cluster_points.0 }}),
+    center: new google.maps.LatLng({{ clusters.0.centre }}),
     mapTypeId: google.maps.MapTypeId.ROADMAP
   });
   
   var markers = []
   
-  {% for cluster in cluster_points %}
+  {% for cluster in clusters %}
     var marker_{{ forloop.counter }} = new google.maps.Marker({
-        position: new google.maps.LatLng({{ cluster }}),
+        position: new google.maps.LatLng({{ cluster.centre }}),
         map: map,
-        icon: 'http://chart.apis.google.com/chart?chst=d_bubble_text_small&chld=bb|{{ forloop.counter }}|E09393|000000'
+        icon: 'http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld={{ forloop.counter }}|FF{{ cluster.heat }}{{ cluster.heat }}|000000'
     })
     jQuery(function(){
         jQuery('#cluster-{{ forloop.counter }}').click(function(){
-            map.setCenter(new google.maps.LatLng({{ cluster }}))
+            map.setCenter(new google.maps.LatLng({{ cluster.centre }}))
             map.setZoom(14)
             for (i in markers)
             {
@@ -58,11 +58,22 @@ function initialize() {
 </head> 
 <body onload="initialize()">
     <div class="container">
-        <div class="span-24 last">
+        <div class="span-18">
             <h1>Location Analysis Report: {{ deployment.name }}</h1>
         </div>
-        <div id="map_canvas" class="span-24 last" style="height: 600px;"></div>
-        <div class="span-24 last">
+        <div class="span-6 last">
+          <form method="get" action="{{ request.path }}">
+            <select name="date">
+              <option>All</option>
+              {% for date in dates %}
+                <option value="{{ date|date:'Y-m-d' }}"{% if date == view_date %}selected="selected"{% endif %}>{{ date|date:'jS F Y' }}</option>
+              {% endfor %}
+            </select>
+            <input type="submit" value="Go" />
+          </form>
+        </div>
+        <div id="map_canvas" class="span-12" style="height: 600px;"></div>
+        <div class="span-12 last">
             <table>
                 <thead>
                     <tr>

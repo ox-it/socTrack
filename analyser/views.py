@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from itertools import chain
 
 from django.shortcuts import get_object_or_404, render_to_response
@@ -60,12 +60,24 @@ def render_kml(request, deployment):
 def render_report(request, deployment):
     # Tim's new method
     deployment = get_object_or_404(Deployment, pk=deployment)
+    view_date = request.GET.get('date')
+    if view_date is not None:
+        try:
+            y, m, d = map(int, view_date.split('-'))
+            dtl = datetime(y, m, d)
+            dth = datetime(y, m, d) + timedelta(days=1)
+        except IndexError:
+            pass
     
     lines = []
     cluster_points = set([l for cluster in Cluster.for_deployment(deployment) for l in cluster.locations.all()])
+    dates = set()
     
     this_line = []
     for location in Location.for_deployment(deployment).filter(accuracy__lt=THRESHOLD_ACCURACY).order_by('sent_date_time'):
+        dates.add(location.sent_date_time.date())
+        if view_date is not None and (location.sent_date_time < dtl or location.sent_date_time > dth):
+            continue
         if location in cluster_points:
             if len(this_line) > 2:
                 lines.append(this_line)
@@ -78,12 +90,20 @@ def render_report(request, deployment):
             this_line.append(location)    
     lines.append(this_line)
     
-    cluster_points = [str(cluster.location.coords[1]) + "," + str(cluster.location.coords[0]) for cluster in Cluster.for_deployment(deployment)] 
+    clusters = []
+    for cluster in Cluster.for_deployment(deployment):
+        eldest = max([l.sent_date_time for l in cluster.locations.all()])
+        youngest = min([l.sent_date_time for l in cluster.locations.all()])
+        if view_date is None or ((eldest < dth and eldest > dtl) or (youngest > dtl and youngest < dth)):
+            cluster.centre = str(cluster.location.coords[1]) + "," + str(cluster.location.coords[0])
+            cluster.heat = "%02X" % max(255 - ((float((eldest - youngest).seconds) / 14400) * 256), 0)
+            clusters.append(cluster)
+    
     context = {
+        'dates': sorted(dates),
+        'view_date': view_date,
         'deployment': deployment,
-        'clusters': Cluster.for_deployment(deployment),
-        'cluster_points': cluster_points,
-        #'cluster_points': [','.join(reversed([str(c) for c in MultiPoint([l.location for l in cluster.locations.all()]).centroid.coords])) for cluster in Cluster.for_deployment(deployment)],
+        'clusters': sorted(clusters, key=lambda cluster: max([l.sent_date_time for l in cluster.locations.all()])),
         'lines': [[','.join(reversed([str(c) for c in l.location.coords])) for l in line] for line in lines]
     }
     
