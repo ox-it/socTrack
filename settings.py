@@ -98,6 +98,8 @@ INSTALLED_APPS = (
     'analyser',
 )
 
+LOGIN_URL = '/admin/login/'
+
 LOG_SERVER_IP = '129.67.101.37'
 LOG_SERVER_PORT = '23456'
 FALLBACK_SMS = '+447700900250'

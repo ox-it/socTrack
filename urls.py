@@ -10,8 +10,6 @@ urlpatterns = patterns('',
     (r'^analyser/', include('analyser.urls')),
     (r'^logger/', include('logger.urls')),
     (r'^manager/', include('manager.urls')),
-    
-    (r'^accounts/login/$', 'django.contrib.auth.views.login'),
 
     # Uncomment the admin/doc line below to enable admin documentation:
     # (r'^admin/doc/', include('django.contrib.admindocs.urls')),
