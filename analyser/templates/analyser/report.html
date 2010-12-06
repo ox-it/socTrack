@@ -26,7 +26,7 @@ function initialize() {
     var marker_{{ forloop.counter }} = new google.maps.Marker({
         position: new google.maps.LatLng({{ cluster }}),
         map: map,
-        icon: 'http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld={{ forloop.counter }}|FF0000|000000'
+        icon: 'http://chart.apis.google.com/chart?chst=d_bubble_text_small&chld=bb|{{ forloop.counter }}|E09393|000000'
     })
     jQuery(function(){
         jQuery('#cluster-{{ forloop.counter }}').click(function(){
@@ -44,6 +44,7 @@ function initialize() {
   
   {% for line in lines %}
     new google.maps.Polyline({
+	strokeOpacity: 0.5,
         path: [
             {% for point in line %}
                 new google.maps.LatLng({{ point }}),
