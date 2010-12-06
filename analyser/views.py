@@ -1,6 +1,7 @@
 from datetime import date, datetime, timedelta
 from itertools import chain
 
+from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render_to_response
 from django.contrib.gis.geos import MultiPoint, LineString
 from django.contrib.auth.decorators import login_required
@@ -58,8 +59,14 @@ def render_kml(request, deployment):
 
 @login_required
 def render_report(request, deployment):
-    # Tim's new method
+    
     deployment = get_object_or_404(Deployment, pk=deployment)
+    
+    if request.GET.get('regenerate') is not None:
+        analyse(deployment.device)
+        return HttpResponseRedirect(request.path_info)
+    
+    # Tim's new method
     view_date = request.GET.get('date')
     if view_date is not None:
         try:
@@ -68,9 +75,6 @@ def render_report(request, deployment):
             dth = datetime(y, m, d) + timedelta(days=1)
         except ValueError, IndexError:
             view_date = None
-    
-    if request.GET.get('regenerate') is not None:
-        analyse(deployment.device)
     
     lines = []
     cluster_points = set([l for cluster in Cluster.for_deployment(deployment) for l in cluster.locations.all()])
