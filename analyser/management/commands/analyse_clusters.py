@@ -15,11 +15,12 @@ from datetime import datetime, timedelta
 THRESHOLD_DISTANCE = 0.20 # The radius points are allowed to be from each other to
                         # be considered as part of a cluster
 THRESHOLD_TIME = 480 # This is the max time interval in minutes between points to be considered the same place
-THRESHOLD_MIN_TIME = 60 # Minimum number of seconds for a point to be considered a 'point'
+THRESHOLD_MIN_TIME = 61 # Minimum number of seconds for a point to be considered a 'point'
 THRESHOLD_ACCURACY = 10# Only consider GPS points below this level of accuracy (NEMA standard)
 THRESHOLD_SPEED = 10  #KPH
 
 def merge_points(locations):
+    # Assumes locations are in time order
     iterations = 0
     points_merged = True
     while points_merged == True:
@@ -60,10 +61,10 @@ class Command(BaseCommand):
                 location.end_date_time = location.sent_date_time
                
             # Keep iterating through gradually decreasing number of points until there has been no change since the last iteration  
-            locations, iterations = merge_points(locations)
+            locations, passone = merge_points(locations)
             locations = [location for location in locations if (location.end_date_time - location.sent_date_time) > timedelta(seconds=THRESHOLD_MIN_TIME)]
-        
-            locations, iterations = merge_points(locations) 
+      	    locations = sorted(locations, key=lambda location: location.sent_date_time) 
+            locations, passtwo = merge_points(locations) 
 
             for location in locations:
                 place = "Unknown location"
@@ -81,7 +82,7 @@ class Command(BaseCommand):
                 c.save()
         
             
-            print device.local_id + " points created: " + str(len(locations)) + " iterations: " + str(iterations)
+            print device.local_id + " points created: " + str(len(locations)) + " pass one iterations: " + str(passone) + " pass two iterations: " + str(passtwo)
                 
                 
 """

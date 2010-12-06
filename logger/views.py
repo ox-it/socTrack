@@ -1,7 +1,7 @@
-from matplotlib.figure import Figure
-from matplotlib.dates import DateFormatter
-from matplotlib.ticker import FixedLocator
-from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+#from matplotlib.figure import Figure
+#from matplotlib.dates import DateFormatter
+#from matplotlib.ticker import FixedLocator
+#from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.decorators import login_required
