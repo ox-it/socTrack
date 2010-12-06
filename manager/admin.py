@@ -120,7 +120,8 @@ class DeploymentAdmin(admin.ModelAdmin):
 
 
 class SMSAdmin(admin.ModelAdmin):
-    pass
+    list_display = ('sim', 'device', 'human_message', 'send_time')
+    list_filter = ('sim', 'device')
 
 admin.site.register(Network, NetworkAdmin)
 admin.site.register(Device, DeviceAdmin)
