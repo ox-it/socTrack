@@ -17,9 +17,11 @@ class Cluster(models.Model):
     device = models.ForeignKey(Device)
     
     @staticmethod
-    def for_deployment(deployment):
-        start = datetime.combine(deployment.survey_start, time(0, 0, 0))
-        end = datetime.combine(deployment.survey_end, time(23, 59, 59))
+    def for_deployment(deployment, start=None, end=None):
+        if start is None:
+            start = datetime.combine(deployment.survey_start, time(0, 0, 0))
+        if end is None:
+            end = datetime.combine(deployment.survey_end, time(23, 59, 59))
         clusters = []
         for cluster in Cluster.objects.filter(device=deployment.device):
             if (cluster.youngest() > start and cluster.eldest() < end) or (cluster.youngest() < start and cluster.eldest() > start) or (cluster.youngest() < end and cluster.eldest() > end):

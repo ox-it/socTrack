@@ -1,4 +1,4 @@
-from datetime import date, datetime, timedelta
+from datetime import date, time, datetime, timedelta
 from itertools import chain
 
 from django.http import HttpResponseRedirect
@@ -12,13 +12,19 @@ from analyser.models import Cluster
 from analyser.analyse import analyse, THRESHOLD_ACCURACY
 from logger.models import Location
 
-@login_required
-def render_kml(request, deployment):
-    # TODO - Use the new algorithm/method here.  
-    deployment = get_object_or_404(Deployment, pk=deployment)
+def context_for_kml(deployment, date):
     
     clusters = []
-    for cluster in Cluster.for_deployment(deployment):
+    
+    if date:
+        date_clusters = Cluster.for_deployment(deployment,
+                               start=datetime.combine(date, time(0, 0, 0)),
+                               end=datetime.combine(date, time(23, 59, 59))
+                              )
+    else:
+        date_clusters = Cluster.for_deployment(deployment)
+    
+    for cluster in date_clusters:
         clusters.append({
             'geocoded': cluster.geocoded,
             'youngest': cluster.youngest(),
@@ -30,7 +36,14 @@ def render_kml(request, deployment):
     lines = []
     this_line = []
     last_point = None
-    for location in Location.for_deployment(deployment).filter(accuracy__lt=THRESHOLD_ACCURACY).order_by('sent_date_time'):
+    if date:
+        date_locations = Location.for_deployment(deployment,
+                               start=datetime.combine(date, time(0, 0, 0)),
+                               end=datetime.combine(date, time(23, 59, 59))
+                              )
+    else:
+        date_locations = Location.for_deployment(deployment)
+    for location in date_locations.filter(accuracy__lt=THRESHOLD_ACCURACY).order_by('sent_date_time'):
         # Break up lines that have more than 30 minutes between points
         if last_point is not None and location.sent_date_time - last_point.sent_date_time > timedelta(minutes=30):
             if len(this_line) > 1:
@@ -40,21 +53,26 @@ def render_kml(request, deployment):
         this_line.append(location)
         last_point = location
     
-    lines.append(this_line)
+    if len(this_line):
+        lines.append(this_line)
     lines = [LineString([l.location for l in line]) for line in lines]
     
     locations = []
-    for location in Location.for_deployment(deployment).filter(accuracy__lt=THRESHOLD_ACCURACY).order_by('sent_date_time'):
+    for location in date_locations.filter(accuracy__lt=THRESHOLD_ACCURACY).order_by('sent_date_time'):
         location.next = location.sent_date_time + timedelta(minutes=30)
         locations.append(location)
     
-    context = {
+    return {
         'device': deployment.device,
         'clusters': clusters,
         'lines': lines,
         'locations': locations,
     }
-    
+
+@login_required
+def render_kml(request, deployment, date=None):
+    deployment = get_object_or_404(Deployment, pk=deployment)
+    context = context_for_kml(deployment, date)
     return render_to_response('analyser/clusters.kml', context, context_instance=RequestContext(request), mimetype='application/vnd.google-earth.kml+xml')
 
 @login_required

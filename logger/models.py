@@ -44,9 +44,11 @@ class Location(models.Model):
         return str(self.sent_date_time)
     
     @staticmethod
-    def for_deployment(deployment):
-        start = datetime.combine(deployment.survey_start, time(0, 0, 0))
-        end = datetime.combine(deployment.survey_end, time(23, 59, 59))
+    def for_deployment(deployment, start=None, end=None):
+        if start is None:
+            start = datetime.combine(deployment.survey_start, time(0, 0, 0))
+        if end is None:
+            end = datetime.combine(deployment.survey_end, time(23, 59, 59))
         return Location.objects.filter(device=deployment.device, sent_date_time__gt=start, sent_date_time__lt=end)
 
     
