@@ -55,7 +55,7 @@ def context_for_kml(deployment, date):
     
     if len(this_line):
         lines.append(this_line)
-    lines = [LineString([l.location for l in line]) for line in lines]
+    lines = [LineString([l.location for l in line]) for line in lines if len(line) > 1]
     
     locations = []
     for location in date_locations.filter(accuracy__lt=THRESHOLD_ACCURACY).order_by('sent_date_time'):
@@ -80,7 +80,7 @@ def render_report(request, deployment):
     
     deployment = get_object_or_404(Deployment, pk=deployment)
     
-    if request.GET.get('regenerate') is not None:
+    if request.GET.get('regenerate', None) != None:
         analyse(deployment.device)
         return HttpResponseRedirect(request.path_info)
     
