@@ -7,17 +7,15 @@ from datetime import date, timedelta
 from manager.models import Deployment
 from analyser.views import context_for_kml
 
-DUMP_FOLDER = '/home/chris/tmp'
-
 class Command(BaseCommand):
-    args = ''
+    args = 'PATH'
     help = 'Outputs KML files for the reports'
         
-    def handle(self, *args, **options):
+    def handle(self, dump_path, *args, **options):
         
         for deployment in Deployment.objects.all():
             
-            ddir = os.path.join(DUMP_FOLDER, str(deployment.pk))
+            ddir = os.path.join(dump_path, str(deployment.pk))
             if not os.path.exists(ddir):
                 os.makedirs(ddir)
             
