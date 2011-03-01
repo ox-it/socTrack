@@ -6,6 +6,7 @@ from twisted.protocols.basic import LineReceiver
 from twisted.internet import reactor
 
 from django.contrib.gis.geos import Point
+from django.core.mail import mail_admins
 
 from manager.models import Device, SMS
 from logger.models import Log, Location, DeviceEvent, BatteryCharge
@@ -141,22 +142,37 @@ class GL100(LineReceiver):
         return processed
 
     def lineReceived(self, line):
-        print line
-        data = self.parse_data(line)
-        
-        # First off, write this line to the log whole
-        log = self.factory.record_log(**data)
-        
-        # Now update our models as appropriate
-        if data['type'] == 'location':
-            for location in data['locations']:
-                self.factory.record_location(log, data['imei'], **location)
-        
-        elif data['type'] == 'battery_charge':
-            self.factory.record_battery_charge(log, **data)
-        
-        elif data['type'] == 'event':
-            self.factory.record_event(log, **data)
+        try:
+            raise Exception('Testing exception!')
+            print line
+            data = self.parse_data(line)
+            
+            # First off, write this line to the log whole
+            log = self.factory.record_log(**data)
+            
+            # Now update our models as appropriate
+            if data['type'] == 'location':
+                for location in data['locations']:
+                    self.factory.record_location(log, data['imei'], **location)
+            
+            elif data['type'] == 'battery_charge':
+                self.factory.record_battery_charge(log, **data)
+            
+            elif data['type'] == 'event':
+                self.factory.record_event(log, **data)
+        except Exception as e:
+            import traceback
+            message = """
+An exception occurred in the logserver!
+
+%s
+
+Traceback:
+
+%s
+""" % (e, traceback.format_exc())
+            mail_admins('[socTrack Log Server] Exception!', message, fail_silently=False)
+            raise
 
 class DjangoLoggingFactory(ServerFactory):
     """
