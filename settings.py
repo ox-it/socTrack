@@ -7,6 +7,7 @@ TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
     ('Chris Northwood', 'christopher.northwood@oucs.ox.ac.uk'),
+    ('Tim Fernando', 'tim.fernando@oucs.ox.ac.uk'),
 )
 
 MANAGERS = ADMINS
@@ -77,7 +78,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
 )
 
-ROOT_URLCONF = 'socTrack.urls'
+ROOT_URLCONF = 'urls'
 
 TEMPLATE_DIRS = (
     os.path.join(os.path.normpath(os.path.dirname(__file__)), 'templates')
@@ -98,7 +99,7 @@ INSTALLED_APPS = (
     'analyser',
 )
 
-LOG_SERVER_IP = '129.67.101.37'
+LOG_SERVER_IP = '163.1.13.33'
 LOG_SERVER_PORT = '23456'
 FALLBACK_SMS = '+447700900250'
 EMAIL_HOST = 'smtp.ox.ac.uk'
