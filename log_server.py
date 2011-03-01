@@ -145,7 +145,6 @@ class GL100(LineReceiver):
 
     def lineReceived(self, line):
         try:
-            raise Exception('Testing exception!')
             print line
             data = self.parse_data(line)
             
