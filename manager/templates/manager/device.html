@@ -10,7 +10,8 @@
   <link rel="stylesheet" href="{{ MEDIA_URL }}blueprint/ie.css" type="text/css" media="screen, projection">
 <![endif]-->
 <script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script> 
-<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js"></script> 
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js"></script>
+{% if last_location %}
 <script type="text/javascript"> 
 function initialize() {
  
@@ -25,25 +26,42 @@ function initialize() {
       map: map
   })
 }
-</script> 
+</script>
+{% endif %}
 </head> 
 <body onload="initialize()">
     <div class="container">
         <div class="span-24 last">
             <h1>Device Current Status: {{ device.local_id }} ({{ device.imei }})</h1>
         </div>
-        <div id="map_canvas" class="span-16" style="height: 600px;"></div>
+        <div id="map_canvas" class="span-16" style="height: 600px;">
+          {% if not last_location %}
+            <em>Location never received</em>
+          {% endif %}
+        </div>
         <div class="span-8 last">
           <h2>Device Communications</h2>
             <dl>
               <dt>Last message received:</dt>
+              {% if last_log %}
                 <dd>{{ last_log.message }}<br/><small>at {{ last_log.received_date_time }}</small></dd>
+              {% else %}
+                <dd><em>Never received</em></dd>
+              {% endif %}
               <dt>Last SMS sent</dt>
+              {% if last_sms %}
                 <dd>{{ last_sms.message }}<br/><br/>{{ last_sms.human_message }}<br/><small>at {{ last_sms.send_time }}<br/>{{ last_sms.response }}</small></dd>
+              {% else %}
+                <dd><em>Never sent</em></dd>
+              {% endif %}
               <dd>
           <h2>Battery Life</h2>
+          {% if last_battery %}
           <img src="/logger/battery-charge/{{ device.pk }}.png"/>
           <p>Current: {{ last_battery.battery_percentage }}%</p>
+          {% else %}
+            <p><em>No battery information.</em></p>
+          {% endif %}
         </div>
         <div class="span-24 last">
           <h2>Device Events</h2>
@@ -59,6 +77,10 @@ function initialize() {
               <tr>
                 <td>{{ event.sent_date_time }}</td>
                 <td>{{ event.event }}</td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="2" style="text-align: center;"><em>No events ever received.</em></td>
               </tr>
               {% endfor %}
             </tbody>

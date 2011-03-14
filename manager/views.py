@@ -12,12 +12,36 @@ def render_device(request, device):
     
     device = get_object_or_404(Device, pk=device)
     
+    locations = Location.objects.filter(device=device).order_by('-sent_date_time')
+    if locations.count() > 0:
+        last_location = locations[0].location.coords
+    else:
+        last_location = None
+    
+    logs = Log.objects.filter(device=device).order_by('-received_date_time')
+    if logs.count() > 0:
+        last_log = logs[0]
+    else:
+        last_log = None
+    
+    smss = SMS.objects.filter(device=device).order_by('-send_time')
+    if smss.count() > 0:
+        last_sms = smss[0]
+    else:
+        last_sms = None
+    
+    battery_events = BatteryCharge.objects.filter(device=device).order_by('-sent_date_time')
+    if battery_events.count() > 0:
+        last_battery = battery_events[0]
+    else:
+        last_battery = None
+    
     context = {
         'device': device,
-        'last_location': Location.objects.filter(device=device).order_by('-sent_date_time')[0].location.coords,
-        'last_log': Log.objects.filter(device=device).order_by('-received_date_time')[0],
-        'last_sms': SMS.objects.filter(device=device).order_by('-send_time')[0],
-        'last_battery': BatteryCharge.objects.filter(device=device).order_by('-sent_date_time')[0],
+        'last_location': last_location,
+        'last_log': last_log,
+        'last_sms': last_sms,
+        'last_battery': last_battery,
         'device_events': DeviceEvent.objects.filter(device=device).order_by('-sent_date_time')
     }
     
