@@ -4,8 +4,18 @@ import urllib
 
 from django.db import models
 from django.conf import settings
+from django.core.exceptions import ValidationError
+
+import re
 
 from secrets import secrets
+
+def number_validator(value):
+    """
+    Checks that there are only numbers in a string
+    """
+    if re.match(r'^\d+$', value) is None:
+        raise ValidationError('Only digits are allowed in this string')
 
 class Network(models.Model):
     name = models.CharField(max_length=30)
@@ -25,7 +35,7 @@ class Network(models.Model):
     
 class Device(models.Model):
     # IMEIs are variable length - max length should be 19 though
-    imei = models.CharField(max_length=19, unique=True)
+    imei = models.CharField(max_length=19, unique=True, validators=[number_validator])
     local_id = models.CharField( 
         max_length=10,
         help_text = "An arbitrary local identifier (e.g. for labeling) up to ten characters long")
@@ -48,7 +58,7 @@ class Sim(models.Model):
         max_length = 50,
         help_text = "The SIM ID as usually printed on the back of the SIM card")
     # phone_number could build in some validation - max_length = 20 is not confirmed as always true internationally, but should be in the UK
-    phone_number = models.CharField(max_length=20)
+    phone_number = models.CharField(max_length=20, validators=[number_validator])
     network = models.ForeignKey(Network)
     data_plan_expiry = models.DateField(help_text = "Date the current data plan expires", null=True, blank=True)
     notes = models.TextField(help_text = "General notes about the SIM card e.g. it is blue", blank=True)
