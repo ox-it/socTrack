@@ -22,7 +22,9 @@ class Command(BaseCommand):
             ddate = deployment.survey_start
             while ddate <= deployment.survey_end and ddate < date.today():
                 with open(os.path.join(ddir, ddate.isoformat() + '.kml'), 'w') as fd:
+                    context = context_for_kml(deployment, ddate)
+                    context['locations'] = []
                     kml = render_to_string('analyser/clusters.kml',
-                                           context_for_kml(deployment, ddate))
+                                           context)
                     fd.write(kml)
                 ddate += timedelta(days=1)
