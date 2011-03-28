@@ -84,5 +84,5 @@ class DeviceEvent(models.Model):
     def for_deployment(deployment):
         start = datetime.combine(deployment.survey_start, time(0, 0, 0))
         end = datetime.combine(deployment.survey_end, time(23, 59, 59))
-        return DeviceEvent.objects.filter(device=deployment.device, received_date_time__gt=start, received_date_time__lt=end)
+        return DeviceEvent.objects.filter(device=deployment.device, sent_date_time__gt=start, sent_date_time__lt=end)
 

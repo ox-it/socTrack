@@ -74,6 +74,7 @@ function initialize() {
         </div>
         <div id="map_canvas" class="span-12" style="height: 600px;"></div>
         <div class="span-12 last">
+	  <h2>Locations</h2>
             <table>
                 <thead>
                     <tr>
@@ -130,6 +131,23 @@ function initialize() {
                     {% endfor %}
                 </tbody>
             </table>
+	  <h2>Events</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Time</th>
+                        <th>Event</th>
+                    </tr>
+                </thead>
+                <tbody>
+		  {% for event in device_events %}
+		    <tr>
+		      <td>{{ event.sent_date_time|date:"j M Y" }}, {{ event.sent_date_time|date:"g:iA"|lower}}</td>
+		      <td>{{ event.event }}</td>
+		    </tr>
+		  {% endfor %}
+		</tbody>
+	    </table>
         </div>
     </div>
 </body> 

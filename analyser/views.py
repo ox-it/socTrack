@@ -10,7 +10,7 @@ from django.template import RequestContext
 from manager.models import Deployment
 from analyser.models import Cluster
 from analyser.analyse import analyse, THRESHOLD_ACCURACY
-from logger.models import Location
+from logger.models import Location, DeviceEvent
 
 def context_for_kml(deployment, date):
     
@@ -127,7 +127,8 @@ def render_report(request, deployment):
         'view_date': view_date,
         'deployment': deployment,
         'clusters': sorted(clusters, key=lambda cluster: cluster.youngest()),
-        'lines': [[','.join(reversed([str(c) for c in l.location.coords])) for l in line] for line in lines]
+        'lines': [[','.join(reversed([str(c) for c in l.location.coords])) for l in line] for line in lines],
+        'device_events': DeviceEvent.for_deployment(deployment),
     }
     
     return render_to_response('analyser/report.html', context, context_instance=RequestContext(request))
