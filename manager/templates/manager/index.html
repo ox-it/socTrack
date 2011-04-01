@@ -1,4 +1,4 @@
-<!DOCTYPE html> 
+{% load dtlocalize %}<!DOCTYPE html>
 <html> 
 <head> 
 <meta name="viewport" content="initial-scale=1.0, user-scalable=no" /> 
@@ -28,7 +28,7 @@
                 <p>The following devices haven't been heard from in 12 hours:</p>
                 <ul>
                 {% for device in danger_device %}
-                    <li>{{ device.local_id }} ({{ device.imei }}) on {{ device.last_heard }}</li>
+                    <li>{{ device.local_id }} ({{ device.imei }}) on {{ device.last_heard|dtlocalize }}</li>
                 {% endfor %}
                 </ul>
             {% endif %}

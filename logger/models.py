@@ -1,8 +1,10 @@
 from datetime import datetime, time
+from dateutil.tz import tzutc
 
 from django.contrib.gis.db import models
 
 from manager.models import Device, SMS
+from analyser.templatetags.dtlocalize import dtlocalize
 
 class Log(models.Model):
     device = models.ForeignKey(Device)
@@ -16,6 +18,8 @@ class Log(models.Model):
     def for_deployment(deployment):
         start = datetime.combine(deployment.survey_start, time(0, 0, 0))
         end = datetime.combine(deployment.survey_end, time(23, 59, 59))
+        start = dtlocalize(start).astimezone(tzutc()).replace(tzinfo=None)
+        end = dtlocalize(end).astimezone(tzutc()).replace(tzinfo=None)
         return Log.objects.filter(device=deployment.device, received_date_time__gt=start, received_date_time__lt=end)
     
 class Location(models.Model):
@@ -49,6 +53,8 @@ class Location(models.Model):
             start = datetime.combine(deployment.survey_start, time(0, 0, 0))
         if end is None:
             end = datetime.combine(deployment.survey_end, time(23, 59, 59))
+        start = dtlocalize(start).astimezone(tzutc()).replace(tzinfo=None)
+        end = dtlocalize(end).astimezone(tzutc()).replace(tzinfo=None)
         return Location.objects.filter(device=deployment.device, sent_date_time__gt=start, sent_date_time__lt=end)
 
     
@@ -65,6 +71,8 @@ class BatteryCharge(models.Model):
     def for_deployment(deployment):
         start = datetime.combine(deployment.survey_start, time(0, 0, 0))
         end = datetime.combine(deployment.survey_end, time(23, 59, 59))
+        start = dtlocalize(start).astimezone(tzutc()).replace(tzinfo=None)
+        end = dtlocalize(end).astimezone(tzutc()).replace(tzinfo=None)
         return BatteryCharge.objects.filter(device=deployment.device, received_date_time__gt=start, received_date_time__lt=end)
 
 
@@ -84,5 +92,7 @@ class DeviceEvent(models.Model):
     def for_deployment(deployment):
         start = datetime.combine(deployment.survey_start, time(0, 0, 0))
         end = datetime.combine(deployment.survey_end, time(23, 59, 59))
+        start = dtlocalize(start).astimezone(tzutc()).replace(tzinfo=None)
+        end = dtlocalize(end).astimezone(tzutc()).replace(tzinfo=None)
         return DeviceEvent.objects.filter(device=deployment.device, sent_date_time__gt=start, sent_date_time__lt=end)
 

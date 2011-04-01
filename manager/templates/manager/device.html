@@ -1,4 +1,4 @@
-<!DOCTYPE html> 
+{% load dtlocalize %}<!DOCTYPE html>
 <html> 
 <head> 
 <meta name="viewport" content="initial-scale=1.0, user-scalable=no" /> 
@@ -44,13 +44,13 @@ function initialize() {
             <dl>
               <dt>Last message received:</dt>
               {% if last_log %}
-                <dd>{{ last_log.message }}<br/><small>at {{ last_log.received_date_time }}</small></dd>
+                <dd>{{ last_log.message }}<br/><small>at {{ last_log.received_date_time|dtlocalize }}</small></dd>
               {% else %}
                 <dd><em>Never received</em></dd>
               {% endif %}
               <dt>Last SMS sent</dt>
               {% if last_sms %}
-                <dd>{{ last_sms.message }}<br/><br/>{{ last_sms.human_message }}<br/><small>at {{ last_sms.send_time }}<br/>{{ last_sms.response }}</small></dd>
+                <dd>{{ last_sms.message }}<br/><br/>{{ last_sms.human_message }}<br/><small>at {{ last_sms.send_time|dtlocalize }}<br/>{{ last_sms.response }}</small></dd>
               {% else %}
                 <dd><em>Never sent</em></dd>
               {% endif %}
@@ -75,7 +75,7 @@ function initialize() {
             <tbody>
               {% for event in device_events %}
               <tr>
-                <td>{{ event.sent_date_time }}</td>
+                <td>{{ event.sent_date_time|dtlocalize }}</td>
                 <td>{{ event.event }}</td>
               </tr>
               {% empty %}

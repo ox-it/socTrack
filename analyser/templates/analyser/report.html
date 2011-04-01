@@ -1,4 +1,4 @@
-<!DOCTYPE html> 
+{% load dtlocalize %}<!DOCTYPE html> 
 <html xmlns:v="urn:schemas-microsoft-com:vml"> 
 <head> 
 <meta name="viewport" content="initial-scale=1.0, user-scalable=no" /> 
@@ -89,40 +89,40 @@ function initialize() {
                         <tr id="cluster-{{ forloop.counter }}">
                             <td>{{ forloop.counter }}</td>
                             
-                              <td>{% ifequal cluster.youngest|date:"dMY" cluster.eldest|date:"dMY" %}
+                              <td>{% ifequal cluster.youngest|dtlocalize|date:"dMY" cluster.eldest|dtlocalize|date:"dMY" %}
                                 {# 1. If start and end time are on the same day #}
                                 {# Date - Month #}
-                                {{ cluster.youngest|date:"j M"}}
+                                {{ cluster.youngest|dtlocalize|date:"j M"}}
                                 {# Only show year if start date is not in this year #}
-                                 {% ifnotequal cluster.youngest|date:"Y" now|date:"Y"%}
-                                   {{ cluster.youngest|date:"Y"}}
+                                 {% ifnotequal cluster.youngest|dtlocalize|date:"Y" now|date:"Y"%}
+                                   {{ cluster.youngest|dtlocalize|date:"Y"}}
                                  {% endifnotequal %}
                           
                                 {# Day - Time #}
                           
-                                {% ifequal cluster.youngest|date:"A" cluster.eldest|date:"A"  %}
+                                {% ifequal cluster.youngest|dtlocalize|date:"A" cluster.eldest|dtlocalize|date:"A"  %}
                                     {# If start and end times are both am or pm #}
-                                    {{ cluster.youngest|date:"g:i"|lower }}-{{ cluster.eldest|date:"g:iA"|lower }}
+                                    {{ cluster.youngest|dtlocalize|date:"g:i"|lower }}-{{ cluster.eldest|dtlocalize|date:"g:iA"|lower }}
                                     {% else %}
-                                    {{ cluster.youngest|date:"g:iA"|lower }}-{{ cluster.eldest|date:"g:iA"|lower }}
+                                    {{ cluster.youngest|dtlocalize|date:"g:iA"|lower }}-{{ cluster.eldest|dtlocalize|date:"g:iA"|lower }}
                                 {% endifequal %}
                                 {# 1. END #}
                           
                               {% else %}
                                 {# Handle the rare occurence that tutorials start and end on different days #}
-                                  {% ifequal cluster.youngest|date:"Y" cluster.eldest|date:"Y" %}
-                                      {% ifequal cluster.youngest|date:"Y" now|date:"Y" %}
+                                  {% ifequal cluster.youngest|dtlocalize|date:"Y" cluster.eldest|dtlocalize|date:"Y" %}
+                                      {% ifequal cluster.youngest|dtlocalize|date:"Y" now|date:"Y" %}
                                       {# Event starts this year and finishes this year %}
-                                          {{ cluster.youngest|date:"j M" }}, {{ cluster.youngest|date:"g:iA"|lower}}-
-                                          <br />{{ cluster.eldest|date:"j M" }}, {{ cluster.eldest|date:"g:iA"|lower}}
+                                          {{ cluster.youngest|dtlocalize|date:"j M" }}, {{ cluster.youngest|dtlocalize|date:"g:iA"|lower}}-
+                                          <br />{{ cluster.eldest|dtlocalize|date:"j M" }}, {{ cluster.eldest|dtlocalize|date:"g:iA"|lower}}
                                       {% else %}
                                       {# Event starts in a different year but finishes in that year too #}
-                                          {{ cluster.youngest|date:"j M y" }}, {{ cluster.youngest|date:"g:iA"|lower}}-
-                                          <br />{{ cluster.eldest|date:"j M y" }}, {{ cluster.eldest|date:"g:iA"|lower}}
+                                          {{ cluster.youngest|dtlocalize|date:"j M y" }}, {{ cluster.youngest|dtlocalize|date:"g:iA"|lower}}-
+                                          <br />{{ cluster.eldest|dtlocalize|date:"j M y" }}, {{ cluster.eldest|dtlocalize|date:"g:iA"|lower}}
                                       {% endifequal %}
                                   {% else %}
-                                      {{ cluster.youngest|date:"j M y" }}, {{ cluster.youngest|date:"g:iA"|lower}}-
-                                      <br />{{ cluster.eldest|date:"j M y" }}, {{ cluster.eldest|date:"g:iA"|lower}}
+                                      {{ cluster.youngest|dtlocalize|date:"j M y" }}, {{ cluster.youngest|dtlocalize|date:"g:iA"|lower}}-
+                                      <br />{{ cluster.eldest|dtlocalize|date:"j M y" }}, {{ cluster.eldest|dtlocalize|date:"g:iA"|lower}}
                                   {% endifequal %}
                               {% endifequal %}</td>
                             <td>{{ cluster.duration }}</td>
@@ -142,7 +142,7 @@ function initialize() {
                 <tbody>
 		  {% for event in device_events %}
 		    <tr>
-		      <td>{{ event.sent_date_time|date:"j M Y" }}, {{ event.sent_date_time|date:"g:iA"|lower}}</td>
+		      <td>{{ event.sent_date_time|dtlocalize|date:"j M Y" }}, {{ event.sent_date_time|dtlocalize|date:"g:iA"|lower}}</td>
 		      <td>{{ event.event }}</td>
 		    </tr>
 		  {% endfor %}
