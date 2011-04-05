@@ -14,8 +14,6 @@ from logger.models import Location, DeviceEvent
 
 def context_for_kml(deployment, date):
     
-    clusters = []
-    
     if date:
         date_clusters = Cluster.for_deployment(deployment,
                                start=datetime.combine(date, time(0, 0, 0)),
@@ -24,15 +22,8 @@ def context_for_kml(deployment, date):
     else:
         date_clusters = Cluster.for_deployment(deployment)
     
-    for cluster in date_clusters:
-        clusters.append({
-            'geocoded': cluster.geocoded,
-            'youngest': cluster.youngest(),
-            'eldest': cluster.eldest(),
-            'poly_kml': MultiPoint([l.location for l in cluster.locations.all()]).convex_hull.kml,
-            'centre_kml': MultiPoint([l.location for l in cluster.locations.all()]).centroid.kml,
-        })
-    
+    cluster_points = set([l for cluster in date_clusters for l in cluster.locations.all()])
+    clusters = []
     lines = []
     this_line = []
     last_point = None
@@ -45,27 +36,56 @@ def context_for_kml(deployment, date):
         date_locations = Location.for_deployment(deployment)
     for location in date_locations.filter(accuracy__lt=THRESHOLD_ACCURACY).order_by('sent_date_time'):
         # Break up lines that have more than 30 minutes between points
-        if last_point is not None and location.sent_date_time - last_point.sent_date_time > timedelta(minutes=30):
+        if not last_point is None and (location in cluster_points or \
+          location.sent_date_time - last_point.sent_date_time > timedelta(minutes=30)):
             if len(this_line) > 1:
                 lines.append(this_line)
             this_line = []
         
-        this_line.append(location)
-        last_point = location
+        if not location in cluster_points:
+            this_line.append(location)
+            last_point = location
+        else:
+            print [c.pk for c in Cluster.objects.filter(locations=location)]
+            last_point = None
     
     if len(this_line):
         lines.append(this_line)
-    lines = [LineString([l.location for l in line]) for line in lines if len(line) > 1]
+    lines = [{
+                'geocoded': 'Line',
+                'youngest': min([l.sent_date_time for l in line]),
+                'eldest': max([l.sent_date_time for l in line]),
+                'poly_kml': LineString([l.location for l in line]).kml,
+             } for line in lines if len(line) > 1]
+    
+    for cluster in date_clusters:
+        clusters.append({
+            'geocoded': cluster.geocoded,
+            'youngest': cluster.youngest(),
+            'eldest': cluster.eldest(),
+            'poly_kml': MultiPoint([l.location for l in cluster.locations.all()]).convex_hull.kml,
+            'centre_kml': MultiPoint([l.location for l in cluster.locations.all()]).centroid.kml,
+        })
     
     locations = []
     for location in date_locations.filter(accuracy__lt=THRESHOLD_ACCURACY).order_by('sent_date_time'):
         location.next = location.sent_date_time + timedelta(minutes=30)
         locations.append(location)
     
+    # remove any lines which are completely subsumed by a cluster
+    last_cluster = None
+    clusters_and_lines = sorted(clusters + lines, key=lambda x: x['youngest'])
+    for cluster in list(clusters_and_lines):
+        if 'centre_kml' in cluster:
+            last_cluster = cluster
+        else:
+            if not last_cluster is None:
+                if last_cluster['eldest'] > cluster['eldest']:
+                     clusters_and_lines.remove(cluster)
+    
     return {
         'device': deployment.device,
-        'clusters': clusters,
-        'lines': lines,
+        'clusters': clusters_and_lines,
         'locations': locations,
     }
 

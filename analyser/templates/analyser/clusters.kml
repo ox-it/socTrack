@@ -15,22 +15,16 @@
             </TimeSpan>
             {{ cluster.poly_kml|safe }}
           </Placemark>
-          <Placemark>
-            <TimeSpan>
-              <begin>{{ cluster.youngest|dtkml }}</begin>
-              <end>{{ cluster.eldest|dtkml }}</end>
-            </TimeSpan>
-            {{ cluster.centre_kml|safe }}
-          </Placemark>
+          {% if cluster.centre_kml %}
+            <Placemark>
+              <TimeSpan>
+                <begin>{{ cluster.youngest|dtkml }}</begin>
+                <end>{{ cluster.eldest|dtkml }}</end>
+              </TimeSpan>
+              {{ cluster.centre_kml|safe }}
+            </Placemark>
+          {% endif %}
         </Folder>
-      {% endfor %}
-    </Folder>
-    <Folder>
-      <name>Lines</name>
-      {% for line in lines %}
-        <Placemark>
-          {{ line.kml|safe }}
-        </Placemark>
       {% endfor %}
     </Folder>
     <Folder>
