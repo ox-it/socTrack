@@ -46,7 +46,6 @@ def context_for_kml(deployment, date):
             this_line.append(location)
             last_point = location
         else:
-            print [c.pk for c in Cluster.objects.filter(locations=location)]
             last_point = None
     
     if len(this_line):
