@@ -24,7 +24,7 @@ class Command(BaseCommand):
                 dfile = "%s_%s.xml" % (deployment.name.strip(), ddate.strftime('%d%m%y'))
                 with open(os.path.join(ddir, dfile), 'w') as fd:
                     context = context_for_kml(deployment, ddate)
-                    context['locations'] = []
+                    #context['locations'] = []
                     kml = render_to_string('analyser/clusters.kml',
                                            context)
                     fd.write(kml)
