@@ -21,7 +21,7 @@ class Command(BaseCommand):
             
             ddate = deployment.survey_start
             while ddate <= deployment.survey_end and ddate < date.today():
-                dfile = "%s_%s.xml" % (deployment.name, ddate.strftime('%y%m%d'))
+                dfile = "%s_%s.xml" % (deployment.name.strip(), ddate.strftime('%d%m%y'))
                 with open(os.path.join(ddir, dfile), 'w') as fd:
                     context = context_for_kml(deployment, ddate)
                     context['locations'] = []
