@@ -13,14 +13,15 @@ class Command(BaseCommand):
         
     def handle(self, dump_path, *args, **options):
         
+        ddir = os.path.join(dump_path)
+        if not os.path.exists(ddir):
+            os.makedirs(ddir)
+        
         for deployment in Deployment.objects.all():
-            
-            ddir = os.path.join(dump_path, str(deployment.pk))
-            if not os.path.exists(ddir):
-                os.makedirs(ddir)
             
             ddate = deployment.survey_start
             while ddate <= deployment.survey_end and ddate < date.today():
+                dfile = "%s_%s.xml" % (deployment.name, ddate.strftime('%y%m%d'))
                 with open(os.path.join(ddir, ddate.isoformat() + '.kml'), 'w') as fd:
                     context = context_for_kml(deployment, ddate)
                     context['locations'] = []
