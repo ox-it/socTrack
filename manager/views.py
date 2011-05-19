@@ -62,10 +62,45 @@ def render_index(request):
             danger_devices.append(device)
         devices.append(device)
     
+    filter_deployment = request.GET.get('name')
+    filter_device = request.GET.get('device')
+    filter_date = request.GET.get('date')
+    
+    deployments = Deployment.objects.all()
+    
+    deployment_names = sorted(set(d.name for d in deployments))
+    all_devices = Device.objects.all()
+    all_dates = sorted(set(d.survey_start for d in deployments))
+    
+    if filter_deployment and filter_deployment != 'All':
+        deployments = deployments.filter(name=filter_deployment)
+    
+    if filter_device and filter_device != 'All':
+        try:
+            filter_device = Device.objects.get(pk=filter_device)
+        except Device.DoesNotExist:
+            pass
+        else:
+            deployments = deployments.filter(device=filter_device)
+    
+    if filter_date and filter_date != 'All':
+        try:
+            filter_date = datetime.strptime(filter_date, '%Y-%m-%d').date()
+        except ValueError:
+            pass
+        else:
+            deployments = deployments.filter(survey_start=filter_date)
+    
     context = {
         'danger_sim': Sim.objects.filter(data_plan_expiry__lt=datetime.now() - timedelta(days=3)),
         'danger_device': danger_devices,
-        'deployments': Deployment.objects.all()
+        'deployments': deployments,
+        'filter_name': filter_deployment,
+        'filter_device': filter_device,
+        'filter_date': filter_date,
+        'deployment_names': deployment_names,
+        'all_devices': all_devices,
+        'all_dates': all_dates,
     }
     
     return render_to_response('manager/index.html', context, context_instance=RequestContext(request))

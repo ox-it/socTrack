@@ -9,6 +9,38 @@
 <!--[if lt IE 8]>
   <link rel="stylesheet" href="{{ MEDIA_URL }}blueprint/ie.css" type="text/css" media="screen, projection">
 <![endif]-->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.1/jquery.min.js"></script>
+<script type="text/javascript">
+  $(function(){
+    $('#danger-sim').hide()
+    $('#danger-device').hide()
+    var danger_sim_hidden = true;
+    var danger_device_hidden = true;
+    $('#danger-sim-toggle').click(function(){
+      if (danger_sim_hidden) {
+        $('#danger-sim').show('fast');
+        $('#danger-sim-toggle').html('Hide list of devices')
+        danger_sim_hidden = false;
+      } else {
+        $('#danger-sim').hide('fast');
+        $('#danger-sim-toggle').html('Show list of devices')
+        danger_sim_hidden = false;
+      }
+    })
+    $('#danger-device-toggle').click(function(){
+      if (danger_device_hidden) {
+        $('#danger-device').show('fast');
+        $('#danger-device-toggle').html('Hide list of devices')
+        danger_device_hidden = false;
+      } else {
+        $('#danger-device').hide('fast');
+        $('#danger-device-toggle').html('Show list of devices')
+        danger_device_hidden = true;
+      }
+    })
+  })
+</script>
+
 </head> 
 <body>
     <div class="container">
@@ -17,16 +49,18 @@
         </div>
         <div class="span-16">
             {% if danger_sim %}
-                <p>The following devices will need topping up soon:</p>
-                <ul>
+                <p>{{ danger_sim|length }} device{{ danger_sim|pluralize }} will need topping up soon:</p>
+                <p><a id="danger-sim-toggle">Show list of devices</a></p>
+                <ul id="danger-sim">
                 {% for sim in danger_sim %}
                     <li>{{ sim.local_id }} ({{ sim.phone_number }}) on {{ sim.data_plan_expiry }}</li>
                 {% endfor %}
                 </ul>
             {% endif %}
             {% if danger_device %}
-                <p>The following devices haven't been heard from in 12 hours:</p>
-                <ul>
+                <p>{{ danger_device|length }} device{{ danger_device|pluralize }} haven't been heard from in 12 hours:</p>
+                <p><a id="danger-device-toggle">Show list of devices</a></p>
+                <ul id="danger-device">
                 {% for device in danger_device %}
                     <li>{{ device.local_id }} ({{ device.imei }}) on {{ device.last_heard|dtlocalize }}</li>
                 {% endfor %}
@@ -38,8 +72,42 @@
                 <li><a href="/admin/">Administration interface</a></li>
             </ul>
         </div>
-        <div class="span-24">
+        <div class="span-24 last">
             <h2>Deployments</h2>
+        </div>
+        <form action="/" method="get">
+          <div class="span-7">
+            <p><strong>Filter by name</strong></p>
+            <select name="name" style="width: 100%;">
+              <option>All</option>
+              {% for name in deployment_names %}
+                <option value="{{ name }}" {% if name == filter_name %} selected="selected"{% endif %}>{{ name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="span-7">
+            <p><strong>Filter by device</strong></p>
+            <select name="device" style="width: 100%;">
+              <option>All</option>
+              {% for device in all_devices %}
+                <option value="{{ device.pk }}"{% if device == filter_device %} selected="selected"{% endif %}>{{ device.local_id }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="span-7 last">
+            <p><strong>Filter by start date</strong></p>
+            <select name="date" style="width: 100%;">
+              <option>All</option>
+              {% for date in all_dates %}
+                <option value="{{ date|date:'Y-m-d' }}"{% if date == filter_date %} selected="selected"{% endif %}>{{ date|date:'jS F Y' }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="span-3 last">
+            <input type="submit" value="Go" style="width: 95%; margin-top: 3em; float: right;" />
+          </div>
+        </form>
+        <div class="span-24 last">
             <table>
                 <thead>
                     <tr>
