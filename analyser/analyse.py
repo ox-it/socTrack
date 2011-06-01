@@ -61,6 +61,9 @@ def analyse(device):
             place, point = geocoder.reverse((location.location[1], location.location[0]))
         except IndexError:
             place = "Unknown location"
+        
+        if place is None:
+            place = 'Unknown location'
     
         c = Cluster(geocoded=place, device=device, location=location.location, speed=location.speed, altitude=location.altitude)
         c.save()
