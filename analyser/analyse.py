@@ -1,6 +1,6 @@
 from django.contrib.gis.geos import MultiPoint
 
-from geocoder import reverse_geocode
+from geopy import geocoders
 
 from secrets import secrets
 from analyser.models import Cluster
@@ -56,10 +56,14 @@ def analyse(device):
     locations, passtwo = merge_points(locations) 
     
     for location in locations:
+        geocoder = geocoders.Google(secrets['GOOGLE'])
         try:
-            place = reverse_geocode(location.location[1], location.location[0])
-        except:
+            place, point = geocoder.reverse((location.location[1], location.location[0]))
+        except IndexError:
             place = "Unknown location"
+        
+        if place is None:
+            place = 'Unknown location'
     
         c = Cluster(geocoded=place, device=device, location=location.location, speed=location.speed, altitude=location.altitude)
         c.save()
