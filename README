@@ -5,8 +5,8 @@ Requirements:
 * South
 * PostGIS / PostgreSQL
 * GeoDjango
-* Reverse Geocode branch of Geopy: pip install svn+http://geopy.googlecode.com/svn/branches/reverse-geocode
 * matlibplot
+* A Yahoo! API key
 
 Log Server
 ==========
