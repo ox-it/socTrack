@@ -3,7 +3,7 @@ from django.contrib.gis.geos import MultiPoint
 from geopy import geocoders
 
 from secrets import secrets
-from analyser.models import Cluster
+from analyser.models import Cluster, GeocodeCache
 from analyser.haversine import haversine
 from logger.models import Location
 
@@ -58,9 +58,18 @@ def analyse(device):
     for location in locations:
         geocoder = geocoders.Google(secrets['GOOGLE'])
         try:
-            place, point = geocoder.reverse((location.location[1], location.location[0]))
-        except IndexError:
-            place = "Unknown location"
+            cache = GeocodeCache.objects.get(location=location)
+        except GeocodeCache.DoesNotExist:
+            try:
+                place, point = geocoder.reverse((location.location[1], location.location[0]))
+            except IndexError:
+                place = "Unknown location"
+            else:
+                if place is not None:
+                    GeocodeCache.objects.create(location=location,
+                                                name=place)
+        else:
+            place = cache.place
         
         if place is None:
             place = 'Unknown location'

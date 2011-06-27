@@ -43,3 +43,13 @@ class Cluster(models.Model):
     
     def duration(self):
         return timesince(self.youngest(), self.eldest())
+
+class GeocodeCache(models.Model):
+    
+    location = models.PointField()
+    name = models.TextField()
+    
+    objects = models.GeoManager()
+    
+    def __unicode__(self):
+        return self.name
