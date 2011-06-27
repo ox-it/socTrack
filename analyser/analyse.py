@@ -69,7 +69,7 @@ def analyse(device):
                     GeocodeCache.objects.create(location=location.location,
                                                 name=place)
         else:
-            place = cache.place
+            place = cache.name
         
         if place is None:
             place = 'Unknown location'
