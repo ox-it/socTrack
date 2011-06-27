@@ -28,8 +28,11 @@ class Cluster(models.Model):
         end = dtlocalize(end).astimezone(tzutc()).replace(tzinfo=None)
         clusters = []
         for cluster in Cluster.objects.filter(device=deployment.device):
-            if (cluster.youngest() > start and cluster.eldest() < end) or (cluster.youngest() < start and cluster.eldest() > start) or (cluster.youngest() < end and cluster.eldest() > end):
-                clusters.append(cluster)
+            try:
+                if (cluster.youngest() > start and cluster.eldest() < end) or (cluster.youngest() < start and cluster.eldest() > start) or (cluster.youngest() < end and cluster.eldest() > end):
+                    clusters.append(cluster)
+            except ValueError:
+                pass
         return clusters
     
     def youngest(self):

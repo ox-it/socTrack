@@ -12,5 +12,3 @@ class Command(BaseCommand):
         # Consider each device one at a time
         for device in Device.objects.all():
             locations, passone, passtwo = analyse(device)
-            
-            print device.local_id + " points created: " + str(len(locations)) + " pass one iterations: " + str(passone) + " pass two iterations: " + str(passtwo)
