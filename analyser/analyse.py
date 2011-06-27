@@ -58,7 +58,7 @@ def analyse(device):
     for location in locations:
         geocoder = geocoders.Google(secrets['GOOGLE'])
         try:
-            cache = GeocodeCache.objects.get(location=location)
+            cache = GeocodeCache.objects.get(location=location.location)
         except GeocodeCache.DoesNotExist:
             try:
                 place, point = geocoder.reverse((location.location[1], location.location[0]))
@@ -66,7 +66,7 @@ def analyse(device):
                 place = "Unknown location"
             else:
                 if place is not None:
-                    GeocodeCache.objects.create(location=location,
+                    GeocodeCache.objects.create(location=location.location,
                                                 name=place)
         else:
             place = cache.place
