@@ -36,13 +36,24 @@ class Cluster(models.Model):
         return clusters
     
     def youngest(self):
-        return min([l.sent_date_time for l in self.locations.all()])
+        try:
+            return min([l.sent_date_time for l in self.locations.all()])
+        except ValueError:
+            return None
     
     def eldest(self):
-        return max([l.sent_date_time for l in self.locations.all()])
+        try:
+            return max([l.sent_date_time for l in self.locations.all()])
+        except ValueError:
+            return None
     
     def duration(self):
-        return timesince(self.youngest(), self.eldest())
+        y = self.youngest()
+        e = self.eldest()
+        if y is not None and e is not None:
+            return timesince(self.youngest(), self.eldest())
+        else:
+            return None
 
 class GeocodeCache(models.Model):
     
