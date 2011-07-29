@@ -1,3 +1,4 @@
+import codecs
 import os
 
 from django.core.management.base import BaseCommand, CommandError
@@ -22,10 +23,9 @@ class Command(BaseCommand):
             ddate = deployment.survey_start
             while ddate <= deployment.survey_end and ddate < date.today():
                 dfile = "%s_%s.xml" % (deployment.name.strip(), ddate.strftime('%d%m%y'))
-                with open(os.path.join(ddir, dfile), 'w') as fd:
+                with codecs.open(os.path.join(ddir, dfile), 'w', 'utf-8') as fd:
                     context = context_for_kml(deployment, ddate)
                     #context['locations'] = []
-                    kml = render_to_string('analyser/clusters.kml',
-                                           context)
+                    kml = render_to_string('analyser/clusters.kml', context)
                     fd.write(kml)
                 ddate += timedelta(days=1)
