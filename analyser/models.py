@@ -29,9 +29,11 @@ class Cluster(models.Model):
         clusters = []
         for cluster in Cluster.objects.filter(device=deployment.device):
             try:
-                if (cluster.youngest() > start and cluster.eldest() < end) or (cluster.youngest() < start and cluster.eldest() > start) or (cluster.youngest() < end and cluster.eldest() > end):
+                if (cluster.youngest() > start and cluster.eldest() < end) \
+                or (cluster.youngest() < start and cluster.eldest() > start) \
+                or (cluster.youngest() < end and cluster.eldest() > end):
                     clusters.append(cluster)
-            except ValueError:
+            except (ValueError, TypeError):
                 pass
         return clusters
     

@@ -1,4 +1,5 @@
 from django.core.management.base import BaseCommand, CommandError
+from django.db import transaction
 
 from manager.models import Device
 from analyser.analyse import analyse
@@ -11,4 +12,6 @@ class Command(BaseCommand):
         
         # Consider each device one at a time
         for device in Device.objects.all():
-            locations, passone, passtwo = analyse(device)
+            with transaction.commit_on_success():
+                locations, passone, passtwo = analyse(device)
+
