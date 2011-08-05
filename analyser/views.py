@@ -1,5 +1,6 @@
 from datetime import date, time, datetime, timedelta
 from itertools import chain
+from operator import itemgetter
 
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render_to_response
@@ -58,6 +59,8 @@ def context_for_kml(deployment, date):
              } for line in lines if len(line) > 1]
     
     for cluster in date_clusters:
+        if cluster.locations.count() == 0:
+            continue
         clusters.append({
             'geocoded': cluster.geocoded,
             'youngest': cluster.youngest(),
@@ -73,7 +76,7 @@ def context_for_kml(deployment, date):
     
     # remove any lines which are completely subsumed by a cluster
     last_cluster = None
-    clusters_and_lines = sorted(clusters + lines, key=lambda x: x['youngest'])
+    clusters_and_lines = sorted(clusters + lines, key=itemgetter('youngest'))
     for cluster in list(clusters_and_lines):
         if 'centre_kml' in cluster:
             last_cluster = cluster
